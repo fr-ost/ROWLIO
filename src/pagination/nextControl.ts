@@ -233,7 +233,7 @@ export function activateNextControl(control: NextControl, view: Window): void {
     /* older engines */
   }
   // Some sites listen for pointer / mouse down-up rather than click.
-  const init: MouseEventInit = { bubbles: true, cancelable: true, composed: true, view, button: 0 };
+  const init: MouseEventInit = { bubbles: true, cancelable: true, composed: true, button: 0 };
   const ctors = view as unknown as { PointerEvent?: typeof PointerEvent; MouseEvent: typeof MouseEvent };
   const Pointer = ctors.PointerEvent;
   if (Pointer) el.dispatchEvent(new Pointer('pointerdown', { ...init, pointerId: 1, isPrimary: true }));

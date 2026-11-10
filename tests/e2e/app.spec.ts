@@ -177,7 +177,7 @@ test.describe('shell', () => {
     await app.goto(`chrome-extension://${extensionId}/app.html?tab=${tabId}#/tables`);
     await dismissOnboarding(app);
     await expect(app.getByTestId('topbar')).toHaveAttribute('data-status', 'no-access');
-    await expect(app.getByTestId('connection-gate')).toContainText('Access to the page expired');
+    await expect(app.getByTestId('connection-gate')).toContainText('No access to this page');
   });
 
   test('settings persist and theme switches', async ({ connect }) => {

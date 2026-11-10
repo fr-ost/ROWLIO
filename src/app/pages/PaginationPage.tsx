@@ -6,10 +6,9 @@ import type { ExtractSpec, NextControlInfo, PaginationSettings, Recipe, TableSum
 import { DEFAULT_IMAGE_OPTIONS, DEFAULT_LINK_OPTIONS } from '@/types';
 import { brand } from '@/config/brand';
 import { formatNumber, t } from '@/i18n';
-import { hasSiteAccess, request, requestSiteAccess } from '@/messaging/tabClient';
+import { request } from '@/messaging/tabClient';
 import { describeStop } from '@/pagination/runner';
 import { listRecipes } from '@/storage/recipes';
-import { hostOf } from '@/utils/url';
 import { useRule } from '@/app/stores/rule';
 import { useTarget } from '@/app/stores/target';
 import { navigate, toast, useUi } from '@/app/stores/ui';
@@ -119,7 +118,6 @@ export function PaginationPage() {
   const [detected, setDetected] = useState<NextControlInfo | null>(null);
   const [detecting, setDetecting] = useState(false);
   const [recipeOpen, setRecipeOpen] = useState(false);
-  const [persistent, setPersistent] = useState(true);
 
   const ruleUsable = rule.fields.length > 0 && rule.fields.every((field) => field.selector.trim() || rule.rowSelector.trim());
 
@@ -143,7 +141,6 @@ export function PaginationPage() {
       })
       .catch(() => setTables([]));
     listRecipes().then(setRecipes).catch(() => setRecipes([]));
-    hasSiteAccess(pageUrl).then(setPersistent).catch(() => setPersistent(true));
     setDetected(null);
   }, [tabId, status, pageUrl]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -349,14 +346,9 @@ export function PaginationPage() {
             </>
           )}
           <Checkbox checked={settings.skipDuplicates} onChange={(skipDuplicates) => patch({ skipDuplicates })} label={t('Skip duplicate records')} description={t('A record identical to one already collected is not added again.')} />
-          {!persistent && hostOf(pageUrl) ? (
-            <Notice icon={Info}>
-              {t('Chrome’s one-click access lasts while the tab stays on {host}. If the next pages are on a different address, grant access first.', { host: hostOf(pageUrl) })}{' '}
-              <button type="button" className="font-medium underline" onClick={async () => setPersistent(await requestSiteAccess(pageUrl))}>
-                {t('Grant access to {host}', { host: hostOf(pageUrl) })}
-              </button>
-            </Notice>
-          ) : null}
+          <p className="text-xs text-zinc-500 dark:text-zinc-400">
+            {t('Access granted by clicking the {name} icon covers this site only. If “next” leads to a different site, the run stops there and tells you.', { name: brand.name })}
+          </p>
         </Card>
 
         <Card className="flex flex-col gap-3 p-4" data-testid="run-panel">

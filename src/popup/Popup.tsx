@@ -140,7 +140,7 @@ export function Popup() {
             <Stat label={t('Images')} value={scan.images} />
           </div>
           <div className="flex flex-col gap-1.5">
-            <Button variant="primary" icon={Table2} disabled={scan.dataTables === 0 || opening} onClick={() => void open({ kind: 'tables', extractAll: true })} data-testid="popup-extract-tables">
+            <Button variant={scan.dataTables === 0 ? 'secondary' : 'primary'} icon={Table2} disabled={scan.dataTables === 0 || opening} onClick={() => void open({ kind: 'tables', extractAll: true })} data-testid="popup-extract-tables">
               {scan.dataTables === 0 ? t('No tables detected on this page') : scan.dataTables === 1 ? t('Extract the table') : t('Extract {count} tables', { count: scan.dataTables })}
             </Button>
             <Button icon={MousePointerClick} disabled={opening} onClick={() => void open({ kind: 'picker' })} data-testid="popup-picker">

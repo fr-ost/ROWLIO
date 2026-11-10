@@ -120,7 +120,7 @@ function FieldRow({ field, index, total, rule }: { field: FieldRule; index: numb
   const sample = result?.scalar ?? result?.samples[0]?.value ?? '';
   return (
     <li className="rounded-lg border border-zinc-200 p-3 dark:border-zinc-800" data-testid="field-row">
-      <div className="grid gap-2 md:grid-cols-[minmax(0,1.1fr)_5.5rem_minmax(0,2fr)_8.5rem_auto]">
+      <div className="grid gap-2 md:grid-cols-[minmax(0,1.1fr)_6.5rem_minmax(0,2fr)_9.5rem_auto]">
         <Input value={field.name} aria-label={t('Field name')} placeholder={t('Field name')} onChange={(event) => updateField(field.id, { name: event.target.value })} data-testid="field-name" />
         <Select value={field.selectorType} aria-label={t('Selector type')} onChange={(event) => updateField(field.id, { selectorType: event.target.value as SelectorType })}>
           <option value="css">CSS</option>

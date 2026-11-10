@@ -7,9 +7,13 @@ import { tagOf } from './dom';
 const STATE_CLASS =
   /^(active|selected|current|hover|hovered|focus|focused|open|opened|closed|show|shown|hide|hidden|visible|disabled|enabled|first|last|odd|even|loaded|loading|lazyloaded|lazyload|lazy|in-view|inview|animate|animated|fade|fade-in|collapsed|collapse|expanded|highlight|highlighted|checked|is-.+|has-.+|js-.+|ng-.+|v-.+|aos-.+|swiper-slide-.+|slick-(active|current|cloned|slide))$/i;
 
-/** Build-generated class names (CSS modules, styled-components, emotion, …). */
+/**
+ * Build-generated class names (CSS modules, styled-components, emotion, …).
+ * A "__suffix" only counts as a hash when it mixes letters and digits, so BEM names
+ * such as "card__title" stay semantic.
+ */
 const HASHED_CLASS =
-  /^(css|sc|jss|jsx|emotion|styled|svelte|astro|chakra)-[a-z0-9-]{4,}$|__[a-z0-9_-]{5,}$|^_[a-z0-9]{4,}$|^[a-z]{1,2}[0-9][a-z0-9]{3,}$|^[a-z0-9]*[0-9][a-z0-9]*[A-Z][A-Za-z0-9]*$/;
+  /^(css|sc|jss|jsx|emotion|styled|svelte|astro|chakra)-[a-z0-9-]{4,}$|__(?=[A-Za-z0-9_-]*\d)(?=[A-Za-z0-9_-]*[A-Za-z])[A-Za-z0-9_-]{5,}$|^_[a-z0-9]{4,}$|^[a-z]{1,2}[0-9][a-z0-9]{3,}$|^[a-z0-9]*[0-9][a-z0-9]*[A-Z][A-Za-z0-9]*$/;
 
 /** Utility classes (Tailwind / Bootstrap helpers): shared by unrelated elements. */
 const UTILITY_CLASS =

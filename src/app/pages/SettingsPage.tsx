@@ -4,7 +4,9 @@ import { Keyboard, ShieldCheck, Trash2 } from 'lucide-react';
 import type { Settings } from '@/types';
 import { brand } from '@/config/brand';
 import { t } from '@/i18n';
-import { listSiteAccess, revokeSiteAccess } from '@/messaging/tabClient';
+import { listSiteAccess, requestSiteAccess, revokeSiteAccess } from '@/messaging/tabClient';
+import { hostOf, originOf } from '@/utils/url';
+import { useTarget } from '@/app/stores/target';
 import { deleteAllData, storageEstimate } from '@/storage/db';
 import { listProjects } from '@/storage/projects';
 import { listRecipes } from '@/storage/recipes';
@@ -62,6 +64,8 @@ export function SettingsPage() {
   const [origins, setOrigins] = useState<string[]>([]);
   const [usage, setUsage] = useState<{ usage: number; quota: number } | null>(null);
   const [counts, setCounts] = useState<{ projects: number; recipes: number } | null>(null);
+  const connectedUrl = useTarget((state) => (state.status === 'ready' ? state.url : ''));
+  const connectedOrigin = originOf(connectedUrl);
   const [confirmWipe, setConfirmWipe] = useState(false);
   const [confirmReset, setConfirmReset] = useState(false);
 
@@ -185,7 +189,19 @@ export function SettingsPage() {
             ))}
           </ul>
         )}
-        <p className="text-xs text-zinc-500">{t('Permanent access is only ever added when you press “Grant access” for a specific site, and Chrome asks you to confirm.')}</p>
+        {connectedOrigin && !origins.includes(`${connectedOrigin}/*`) ? (
+          <div>
+            <Button
+              onClick={async () => {
+                if (await requestSiteAccess(connectedUrl)) toast.success(t('{name} can now read {host} without a click each time', { name: brand.name, host: hostOf(connectedUrl) }));
+                await refresh();
+              }}
+            >
+              {t('Always allow on {host}', { host: hostOf(connectedUrl) })}
+            </Button>
+          </div>
+        ) : null}
+        <p className="text-xs text-zinc-500">{t('Permanent access is only ever added when you ask for it for one specific site, and Chrome asks you to confirm. Remove it here at any time.')}</p>
       </Section>
 
       <Section title={t('Keyboard shortcuts')} description={t('Shortcuts are managed by Chrome.')}>

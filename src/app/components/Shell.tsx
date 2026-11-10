@@ -142,8 +142,13 @@ export function TopBar() {
       secondary = t('Chrome does not allow extensions on browser pages, the Chrome Web Store and similar pages.');
       break;
     case 'no-access':
-      primary = title || host || t('Access to the page expired');
-      secondary = t('Click the {name} icon on that tab again, or grant access to the site.', { name: brand.name });
+      if (host) {
+        primary = title || host;
+        secondary = t('Access to this page expired. Click the {name} icon on that tab again, or grant access to the site.', { name: brand.name });
+      } else {
+        primary = t('The tab moved to another site');
+        secondary = t('{name} only has access to the site you invoked it on. Click the {name} icon on that tab to continue there.', { name: brand.name });
+      }
       break;
     case 'closed':
       primary = t('The connected page was closed');
@@ -246,7 +251,7 @@ export function ConnectionGate({ children }: { children: React.ReactNode }) {
   const messages: Record<string, [string, string]> = {
     none: [t('Connect a page first'), t('Open the webpage you want to extract from, then click the {name} icon in Chrome’s toolbar and choose an action. {name} only reads a page after you ask it to.', { name: brand.name })],
     restricted: [t('This page cannot be read'), t('Chrome blocks every extension on its own pages (chrome://…), the Chrome Web Store, and a few other protected pages. Open a regular webpage instead.')],
-    'no-access': [t('Access to the page expired'), t('Chrome grants {name} temporary access each time you click its icon on a page. Click the icon on that tab again, or use “Grant access” above to keep access to this site.', { name: brand.name })],
+    'no-access': [t('No access to this page'), t('Chrome grants {name} temporary access to one site each time you click its icon, and withdraws it when the tab moves to another site. Click the {name} icon on that tab to continue. Your extracted data is still in the Data Preview.', { name: brand.name })],
     closed: [t('The connected page was closed'), t('Open a page and click the {name} icon there to connect again. Your extracted data is still in the Data Preview.', { name: brand.name })],
     failed: [t('Could not reach the page'), error || t('Reload the page and try again.')],
   };

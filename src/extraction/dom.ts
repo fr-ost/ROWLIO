@@ -79,10 +79,12 @@ export interface TextOptions {
   imageAlt?: boolean;
 }
 
-function walkText(node: Node, out: string[], opts: TextOptions): void {
+function walkText(node: Node, out: string[], opts: TextOptions, preformatted = false): void {
   for (let child = node.firstChild; child; child = child.nextSibling) {
     if (child.nodeType === 3) {
-      out.push((child as Text).data);
+      // Line breaks in the HTML source are just whitespace – except inside <pre>.
+      const data = (child as Text).data;
+      out.push(preformatted ? data : data.replace(/[\s\u00a0]+/g, ' '));
       continue;
     }
     if (child.nodeType !== 1) continue;
@@ -106,18 +108,19 @@ function walkText(node: Node, out: string[], opts: TextOptions): void {
       out.push(` ${control} `);
       continue;
     }
+    const pre = preformatted || tag === 'PRE';
     if (tag === 'TD' || tag === 'TH') {
       // Only reached for cells of a table nested inside the element being read.
-      walkText(el, out, opts);
+      walkText(el, out, opts, pre);
       out.push(CELL_SEPARATOR);
       continue;
     }
     const block = BLOCK_TAGS.has(tag);
     if (block) out.push(LINE_BREAK);
-    walkText(el, out, opts);
+    walkText(el, out, opts, pre);
     // Slotted / shadow content is part of what the user sees.
     const shadow = (el as Element & { shadowRoot?: ShadowRoot | null }).shadowRoot;
-    if (shadow) walkText(shadow, out, opts);
+    if (shadow) walkText(shadow, out, opts, pre);
     if (block) out.push(LINE_BREAK);
   }
 }
@@ -135,7 +138,7 @@ export function elementText(el: Element, opts: TextOptions = {}): string {
   if (tag === 'META') return (el.getAttribute('content') ?? '').trim();
 
   const parts: string[] = [];
-  walkText(el, parts, opts);
+  walkText(el, parts, opts, tag === 'PRE');
   if (parts.length === 0) return '';
   if (parts.length === 1 && parts[0].indexOf(LINE_BREAK) === -1) {
     return parts[0].replace(/[\s ]+/g, ' ').trim();

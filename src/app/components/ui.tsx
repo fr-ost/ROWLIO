@@ -99,8 +99,14 @@ export const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(functio
 
 // ---- Form controls -----------------------------------------------------------------------
 
-const CONTROL =
-  'h-8 w-full min-w-0 rounded-md border border-zinc-300 bg-white px-2.5 text-[13px] text-zinc-900 placeholder:text-zinc-400 disabled:cursor-not-allowed disabled:opacity-60 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:placeholder:text-zinc-500';
+const CONTROL_BASE =
+  'h-8 min-w-0 rounded-md border border-zinc-300 bg-white px-2.5 text-[13px] text-zinc-900 placeholder:text-zinc-400 disabled:cursor-not-allowed disabled:opacity-60 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:placeholder:text-zinc-500';
+
+/** Controls fill their container unless the caller gives them a width of their own. */
+function control(className: string | undefined): string {
+  const sized = /(^|\s)(w-|flex-1|grow)/.test(className ?? '');
+  return sized ? CONTROL_BASE : `${CONTROL_BASE} w-full`;
+}
 
 export const Input = forwardRef<HTMLInputElement, InputHTMLAttributes<HTMLInputElement> & { invalid?: boolean; mono?: boolean }>(
   function Input({ className, invalid, mono, ...rest }, ref) {
@@ -108,7 +114,7 @@ export const Input = forwardRef<HTMLInputElement, InputHTMLAttributes<HTMLInputE
       <input
         ref={ref}
         aria-invalid={invalid || undefined}
-        className={cx(CONTROL, mono && 'font-mono text-xs', invalid && 'border-red-500 dark:border-red-500', className)}
+        className={cx(control(className), mono && 'font-mono text-xs', invalid && 'border-red-500 dark:border-red-500', className)}
         {...rest}
       />
     );
@@ -119,7 +125,7 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaHTMLAttributes<H
   { className, ...rest },
   ref,
 ) {
-  return <textarea ref={ref} className={cx(CONTROL, 'h-auto py-1.5 leading-relaxed', className)} {...rest} />;
+  return <textarea ref={ref} className={cx(control(className), 'h-auto py-1.5 leading-relaxed', className)} {...rest} />;
 });
 
 export const Select = forwardRef<HTMLSelectElement, SelectHTMLAttributes<HTMLSelectElement>>(function Select(
@@ -127,7 +133,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectHTMLAttributes<HTMLSel
   ref,
 ) {
   return (
-    <select ref={ref} className={cx(CONTROL, 'pr-7', className)} {...rest}>
+    <select ref={ref} className={cx(control(className), 'pr-7', className)} {...rest}>
       {children}
     </select>
   );
@@ -522,6 +528,8 @@ export function Menu({
 
   // Menus inside a modal <dialog> must be portalled into it, or they render underneath.
   const host = triggerRef.current?.closest('dialog') ?? document.body;
+  // Keep labels aligned when only some items carry an icon.
+  const hasIcons = items.some((item) => (item.type === undefined || item.type === 'item') && (item.icon !== undefined || item.checked !== undefined));
 
   return (
     <>
@@ -572,7 +580,13 @@ export function Menu({
                       item.danger && 'text-red-600 dark:text-red-400',
                     )}
                   >
-                    {Icon ? <Icon className="size-3.5 shrink-0 opacity-70" aria-hidden /> : item.checked !== undefined ? <span className="size-3.5 shrink-0">{item.checked ? <Check className="size-3.5" aria-hidden /> : null}</span> : null}
+                    {Icon ? (
+                      <Icon className="size-3.5 shrink-0 opacity-70" aria-hidden />
+                    ) : item.checked !== undefined ? (
+                      <span className="size-3.5 shrink-0">{item.checked ? <Check className="size-3.5" aria-hidden /> : null}</span>
+                    ) : hasIcons ? (
+                      <span className="size-3.5 shrink-0" aria-hidden />
+                    ) : null}
                     <span className="min-w-0 flex-1 truncate">{item.label}</span>
                     {item.hint ? <span className="text-[11px] text-zinc-400">{item.hint}</span> : null}
                   </button>

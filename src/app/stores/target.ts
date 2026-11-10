@@ -43,6 +43,7 @@ export const useTarget = create<TargetState>((set, get) => ({
     const { tabId } = get();
     if (tabId === null) return false;
     const seq = ++connectSeq;
+    const wasReady = get().status === 'ready' || get().scan !== null;
     set({ status: 'connecting', error: '', scanning: true });
     try {
       // tab.url is only visible while Rowlio has access to the tab.
@@ -60,8 +61,15 @@ export const useTarget = create<TargetState>((set, get) => ({
       return true;
     } catch (error) {
       if (seq !== connectSeq) return false;
-      if (error instanceof TabAccessError) set({ status: error.code, error: error.message, scanning: false, scan: null });
-      else set({ status: 'failed', error: error instanceof Error ? error.message : String(error), scanning: false, scan: null });
+      if (error instanceof TabAccessError) {
+        // Losing access after having had it means the tab moved to another site. Chrome
+        // hides that site's address from us, so the old one must not be shown (or offered
+        // in "Grant access") as if it were still current.
+        const moved = error.code === 'no-access' && wasReady;
+        set({ status: error.code, error: error.message, scanning: false, scan: null, ...(moved ? { url: '', title: '' } : {}) });
+      } else {
+        set({ status: 'failed', error: error instanceof Error ? error.message : String(error), scanning: false, scan: null });
+      }
       return false;
     }
   },
