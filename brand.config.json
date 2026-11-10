@@ -1,0 +1,33 @@
+{
+  "name": "Rowlio",
+  "storeTitle": "Rowlio: Free Web Scraper & Data Extractor",
+  "category": "Web Scraper & Data Extractor",
+  "tagline": "Turn any webpage into structured data.",
+  "company": "Unique Labs",
+  "attribution": "by Unique Labs",
+  "motto": "Useful technology. Accessible to everyone.",
+  "shortDescription": "Turn any webpage into structured data. Extract tables, lists, links and images to CSV, XLSX or JSON. Free forever, 100% local.",
+  "positioning": "A powerful, accessible, privacy-first web scraping and structured data extraction tool for everyone.",
+  "promises": [
+    "Free forever",
+    "Unlimited use",
+    "No account required",
+    "No subscription or premium lock",
+    "No watermarks",
+    "No data leaves your browser"
+  ],
+  "colors": {
+    "brand": "#0d9467",
+    "brandDark": "#0a7653",
+    "ink": "#18181b"
+  },
+  "urls": {
+    "homepage": "",
+    "support": "",
+    "privacyPolicy": "",
+    "sourceCode": ""
+  },
+  "filePrefix": "rowlio",
+  "projectFileExtension": ".rowlio.json",
+  "recipeFileExtension": ".rowlio-recipes.json"
+}
