@@ -450,18 +450,29 @@ export function Menu({
     if (focusTrigger) triggerRef.current?.focus();
   }, []);
 
-  useLayoutEffect(() => {
-    if (!open || !triggerRef.current || !menuRef.current) return;
+  /** Position the menu next to its trigger. Returns false when the trigger left the viewport. */
+  const place = useCallback((): boolean => {
+    if (!triggerRef.current || !menuRef.current) return false;
     const rect = triggerRef.current.getBoundingClientRect();
+    if (rect.bottom < 0 || rect.top > window.innerHeight || rect.right < 0 || rect.left > window.innerWidth) return false;
     const menu = menuRef.current.getBoundingClientRect();
     let left = align === 'end' ? rect.right - menu.width : rect.left;
     left = Math.max(8, Math.min(left, window.innerWidth - menu.width - 8));
     let top = rect.bottom + 4;
     if (top + menu.height > window.innerHeight - 8) top = Math.max(8, rect.top - menu.height - 4);
-    setPosition({ top, left });
-    const first = menuRef.current.querySelector<HTMLElement>('[role^="menuitem"]:not([aria-disabled="true"])');
-    first?.focus();
-  }, [open, align, items.length]);
+    setPosition((current) => (current && current.top === top && current.left === left ? current : { top, left }));
+    return true;
+  }, [align]);
+
+  useLayoutEffect(() => {
+    if (!open) {
+      setPosition(null);
+      return;
+    }
+    place();
+    const first = menuRef.current?.querySelector<HTMLElement>('[role^="menuitem"]:not([aria-disabled="true"])');
+    first?.focus({ preventScroll: true });
+  }, [open, place, items.length]);
 
   useEffect(() => {
     if (!open) return;
@@ -470,19 +481,20 @@ export function Menu({
       if (menuRef.current?.contains(target) || triggerRef.current?.contains(target)) return;
       close(false);
     };
-    const onScroll = (event: Event) => {
+    // Follow the trigger while the page scrolls; close only once it is out of view.
+    const onMove = (event: Event) => {
       if (menuRef.current?.contains(event.target as Node)) return;
-      close(false);
+      if (!place()) close(false);
     };
     document.addEventListener('pointerdown', onPointer, true);
-    window.addEventListener('resize', onScroll);
-    window.addEventListener('scroll', onScroll, true);
+    window.addEventListener('resize', onMove);
+    window.addEventListener('scroll', onMove, true);
     return () => {
       document.removeEventListener('pointerdown', onPointer, true);
-      window.removeEventListener('resize', onScroll);
-      window.removeEventListener('scroll', onScroll, true);
+      window.removeEventListener('resize', onMove);
+      window.removeEventListener('scroll', onMove, true);
     };
-  }, [open, close]);
+  }, [open, close, place]);
 
   const onKeyDown = (event: ReactKeyboardEvent<HTMLDivElement>) => {
     const options = Array.from(menuRef.current?.querySelectorAll<HTMLElement>('[role^="menuitem"]:not([aria-disabled="true"])') ?? []);

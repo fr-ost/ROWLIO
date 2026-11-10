@@ -74,6 +74,12 @@ export async function dismissOnboarding(app: Page): Promise<void> {
   await skip.waitFor({ state: 'visible', timeout: 10_000 });
   await skip.click();
   await expect(app.getByTestId('onboarding')).toHaveCount(0);
+  await settingsSaved(app);
+}
+
+/** Settings are applied instantly and written to IndexedDB right after; wait for the write. */
+export async function settingsSaved(app: Page): Promise<void> {
+  await expect(app.locator('html')).not.toHaveAttribute('data-saving', 'true');
 }
 
 /** The extension opens its welcome tab on install; close it so tests start clean. */

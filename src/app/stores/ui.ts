@@ -46,7 +46,7 @@ interface UiState {
 export type DeepPartial<T> = { [K in keyof T]?: T[K] extends object ? DeepPartial<T[K]> : T[K] };
 
 let nextToastId = 1;
-let settingsTicket = 0;
+let pendingSaves = 0;
 
 function mergeDeep<T>(base: T, patch: DeepPartial<T>): T {
   const result = { ...base } as Record<string, unknown>;
@@ -83,12 +83,23 @@ export const useUi = create<UiState>((set, get) => ({
     }
   },
   updateSettings: async (patch) => {
-    // Apply immediately so controls respond at once, then persist. Only the most recent
-    // save may overwrite the store, so quick successive changes never flicker back.
-    const ticket = ++settingsTicket;
+    // Apply immediately so controls respond at once, then persist. The store is only
+    // overwritten once every queued save has finished, so quick successive changes never
+    // flicker back. <html data-saving> is set while a save is in flight.
     set({ settings: mergeDeep(get().settings, patch) });
-    const saved = await saveSettings(patch);
-    if (ticket === settingsTicket) set({ settings: saved });
+    pendingSaves++;
+    document.documentElement.dataset.saving = 'true';
+    try {
+      const saved = await saveSettings(patch);
+      if (pendingSaves === 1) set({ settings: saved });
+    } catch (error) {
+      // Could not persist: show what is really stored rather than a change that was lost.
+      if (pendingSaves === 1) await get().loadSettings();
+      throw error;
+    } finally {
+      pendingSaves--;
+      if (pendingSaves === 0) delete document.documentElement.dataset.saving;
+    }
   },
 }));
 

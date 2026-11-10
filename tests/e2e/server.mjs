@@ -276,4 +276,9 @@ export function createServer() {
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   createServer().listen(PORT, '127.0.0.1', () => console.log(`[fixtures] http://127.0.0.1:${PORT}`));
+  // A second loopback address the test build has NO host permission for: it stands in
+  // for "a site Rowlio was not invoked on" (the production situation for every site).
+  createServer()
+    .listen(PORT, '127.0.0.2')
+    .on('error', () => console.warn('[fixtures] 127.0.0.2 is not available; the no-access test will be skipped'));
 }
