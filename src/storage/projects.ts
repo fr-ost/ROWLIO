@@ -51,11 +51,19 @@ async function persist(
     const store = tx.objectStore('datasets');
     const [existing, stale] = await Promise.all([projects.get(id), store.index('projectId').getAllKeys(id)]);
     const meta = build(existing);
-    const work: Promise<unknown>[] = stale.map((key) => store.delete(key));
-    work.push(projects.put(meta));
+    // If a later put() throws synchronously, the requests already queued are rejected by
+    // the abort below before anything awaits them. Mark each one handled as it is
+    // created; Promise.all still surfaces the failure.
+    const work: Promise<unknown>[] = [];
+    const queue = (request: Promise<unknown>) => {
+      request.catch(() => undefined);
+      work.push(request);
+    };
+    for (const key of stale) queue(store.delete(key));
+    queue(projects.put(meta));
     datasets.forEach((dataset, order) => {
       const record: StoredDataset = { id: uid('sd'), projectId: id, order, dataset };
-      work.push(store.put(record));
+      queue(store.put(record));
     });
     await Promise.all(work);
     await tx.done;

@@ -151,7 +151,18 @@ function isPlainNumber(value: string): boolean {
   return !(first === 45 && significant === '');
 }
 
-/** Excel serial for strict `YYYY-MM-DD` / `YYYY-MM-DDTHH:mm(:ss)` between 1900 and 9999, else null. */
+/** First serial on which Excel, LibreOffice and Google Sheets agree: 1 March 1900. */
+const FIRST_PORTABLE_SERIAL = 61;
+
+/**
+ * Serial number for strict `YYYY-MM-DD` / `YYYY-MM-DDTHH:mm(:ss)`, or null when the value
+ * must stay text: not that exact shape, not a real calendar date, or outside 1900-03-01 …
+ * 9999-12-31.
+ *
+ * Why not from 1900-01-01: Excel's calendar contains a non-existent 29 Feb 1900, while
+ * LibreOffice and Google Sheets do not, so every serial below 61 shows a different day
+ * depending on the application. Those 59 days are written as text, which is right everywhere.
+ */
 function isoDateSerial(value: string): { serial: number; hasTime: boolean } | null {
   if (value.length < 10 || value.length > 19 || value.charCodeAt(4) !== 45) return null;
   const match = ISO_DATE.exec(value);
@@ -164,10 +175,8 @@ function isoDateSerial(value: string): { serial: number; hasTime: boolean } | nu
   const check = new Date(utc);
   // Date.UTC rolls impossible dates over (Feb 30 → Mar 1); reject those.
   if (check.getUTCMonth() !== month - 1 || check.getUTCDate() !== day) return null;
-  let serial = utc / MS_PER_DAY + UNIX_EPOCH_SERIAL;
-  // Excel's calendar contains the non-existent 29 Feb 1900 (serial 60), so real dates
-  // before 1 Mar 1900 are numbered one lower.
-  if (serial < 61) serial -= 1;
+  const serial = utc / MS_PER_DAY + UNIX_EPOCH_SERIAL;
+  if (serial < FIRST_PORTABLE_SERIAL) return null;
 
   if (match[4] === undefined) return { serial, hasTime: false };
   const hour = Number(match[4]);
