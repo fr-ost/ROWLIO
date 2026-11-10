@@ -27,6 +27,9 @@ export const test = base.extend<Fixtures>({
       channel: 'chromium',
       headless: true,
       acceptDownloads: true,
+      // CI containers often run with the POSIX locale, in which Chrome replaces any
+      // non-ASCII download name with "download". Real desktops use a UTF-8 locale.
+      env: { ...(process.env as Record<string, string>), LANG: 'C.UTF-8', LC_ALL: 'C.UTF-8' },
       viewport: { width: 1360, height: 860 },
       args: [`--disable-extensions-except=${EXTENSION_DIR}`, `--load-extension=${EXTENSION_DIR}`],
     });
@@ -56,6 +59,7 @@ export const test = base.extend<Fixtures>({
       }, target.url());
       const app = await context.newPage();
       await app.goto(`chrome-extension://${extensionId}/app.html?tab=${tabId}${hash}`);
+      await dismissOnboarding(app);
       await expect(app.getByTestId('topbar')).toHaveAttribute('data-status', 'ready', { timeout: 15_000 });
       return { target, app, tabId };
     });
@@ -63,6 +67,14 @@ export const test = base.extend<Fixtures>({
 });
 
 export { expect };
+
+/** A fresh profile shows the first-run introduction; most tests are not about it. */
+export async function dismissOnboarding(app: Page): Promise<void> {
+  const skip = app.getByTestId('onboarding-skip');
+  await skip.waitFor({ state: 'visible', timeout: 10_000 });
+  await skip.click();
+  await expect(app.getByTestId('onboarding')).toHaveCount(0);
+}
 
 /** The extension opens its welcome tab on install; close it so tests start clean. */
 export async function closeWelcomeTabs(context: BrowserContext): Promise<void> {

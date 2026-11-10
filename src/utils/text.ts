@@ -44,12 +44,19 @@ export function humanize(identifier: string): string {
   return words ? words.charAt(0).toUpperCase() + words.slice(1) : '';
 }
 
+/**
+ * File-name friendly slug. Latin accents are folded (é → e); letters of every other
+ * script are kept together with their combining marks, so "বাংলা তথ্য" stays readable
+ * instead of losing its vowel signs.
+ */
 export function slugify(value: string, max = 60): string {
   const slug = value
     .normalize('NFKD')
-    .replace(/[̀-ͯ]/g, '')
-    .replace(/[^\p{L}\p{N}]+/gu, '-')
+    .replace(/[\u0300-\u036f]/g, '')
+    .normalize('NFC')
+    .replace(/[^\p{L}\p{M}\p{N}]+/gu, '-')
     .replace(/^-+|-+$/g, '')
     .toLowerCase();
-  return slug.slice(0, max).replace(/-+$/g, '');
+  // Cut on a code point boundary and never leave a dangling combining mark or dash.
+  return Array.from(slug).slice(0, max).join('').replace(/-+$/g, '');
 }

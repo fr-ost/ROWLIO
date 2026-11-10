@@ -46,6 +46,20 @@ interface UiState {
 export type DeepPartial<T> = { [K in keyof T]?: T[K] extends object ? DeepPartial<T[K]> : T[K] };
 
 let nextToastId = 1;
+let settingsTicket = 0;
+
+function mergeDeep<T>(base: T, patch: DeepPartial<T>): T {
+  const result = { ...base } as Record<string, unknown>;
+  for (const [key, value] of Object.entries(patch as Record<string, unknown>)) {
+    if (value === undefined) continue;
+    const current = result[key];
+    result[key] =
+      value !== null && typeof value === 'object' && !Array.isArray(value) && current !== null && typeof current === 'object'
+        ? mergeDeep(current, value as DeepPartial<typeof current>)
+        : value;
+  }
+  return result as T;
+}
 
 export const useUi = create<UiState>((set, get) => ({
   route: parseHash(),
@@ -69,8 +83,12 @@ export const useUi = create<UiState>((set, get) => ({
     }
   },
   updateSettings: async (patch) => {
-    const settings = await saveSettings(patch);
-    set({ settings });
+    // Apply immediately so controls respond at once, then persist. Only the most recent
+    // save may overwrite the store, so quick successive changes never flicker back.
+    const ticket = ++settingsTicket;
+    set({ settings: mergeDeep(get().settings, patch) });
+    const saved = await saveSettings(patch);
+    if (ticket === settingsTicket) set({ settings: saved });
   },
 }));
 
