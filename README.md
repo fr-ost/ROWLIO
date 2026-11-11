@@ -124,7 +124,9 @@ serves it on `http://127.0.0.1:4321`.
 **Deploying to Vercel:** import this repository and deploy the repository root. The
 committed [`vercel.json`](vercel.json) tells Vercel to skip dependency installation, run
 `node scripts/website.mjs` and serve `website-dist/`; no settings need to be changed in
-the dashboard. The download on the site is `website/downloads/rowlio-<version>.zip`,
+the dashboard. If the Vercel project's Root Directory is set to `website` instead,
+`website/vercel.json` does the same job from there (it needs Vercel's default "include
+files outside the root directory" setting left on). The download on the site is `website/downloads/rowlio-<version>.zip`,
 which `npm run package` followed by `npm run website` refreshes. Commit it after a
 release. This deployment has not been run from here: the build was verified locally only.
 

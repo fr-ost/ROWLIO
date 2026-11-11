@@ -16,7 +16,10 @@ import http from 'node:http';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const src = path.join(root, 'website');
-const out = path.join(root, 'website-dist');
+// `--out <dir>` (relative to the current directory) changes the output folder. Used when
+// Vercel's Root Directory is set to `website`, where the output must live inside it.
+const outArg = process.argv.indexOf('--out');
+const out = outArg > -1 && process.argv[outArg + 1] ? path.resolve(process.argv[outArg + 1]) : path.join(root, 'website-dist');
 const pkg = JSON.parse(await fs.readFile(path.join(root, 'package.json'), 'utf8'));
 const brand = JSON.parse(await fs.readFile(path.join(root, 'brand.config.json'), 'utf8'));
 
@@ -67,6 +70,7 @@ async function copyDir(from, to) {
   for (const entry of await fs.readdir(from, { withFileTypes: true })) {
     const a = path.join(from, entry.name);
     const b = path.join(to, entry.name);
+    if (a === out || entry.name === 'vercel.json') continue;
     if (entry.isDirectory()) await copyDir(a, b);
     else if (entry.name.endsWith('.html')) await fs.writeFile(b, render(await fs.readFile(a, 'utf8')));
     else await fs.copyFile(a, b);
