@@ -2,7 +2,7 @@
   "name": "rowlio",
   "version": "1.1.0",
   "private": true,
-  "description": "Rowlio: Free Web Scraper & Data Extractor. Turn any webpage into structured data.",
+  "description": "Rowlio: Web Scraper & Data Extractor. Turn any webpage into structured data.",
   "type": "module",
   "scripts": {
     "dev": "node scripts/build.mjs --watch",

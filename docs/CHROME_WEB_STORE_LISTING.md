@@ -5,10 +5,10 @@ brand clearance before submitting. Nothing here has been submitted.
 
 ## Store listing
 
-**Title** (max 75 characters — 41 used)
+**Title** (max 75 characters — 36 used)
 
 ```
-Rowlio: Free Web Scraper & Data Extractor
+Rowlio: Web Scraper & Data Extractor
 ```
 
 **Summary** (max 132 characters — 126 used)

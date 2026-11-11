@@ -195,7 +195,7 @@ describe('async helpers', () => {
 describe('brand configuration', () => {
   it('is the single source of product identity', () => {
     expect(brand.name).toBe('Rowlio');
-    expect(brand.storeTitle).toBe('Rowlio: Free Web Scraper & Data Extractor');
+    expect(brand.storeTitle).toBe('Rowlio: Web Scraper & Data Extractor');
     expect(brand.tagline).toBe('Turn any webpage into structured data.');
     expect(brand.company).toBe('Unique Labs');
     expect(brand.shortDescription.length).toBeLessThanOrEqual(132);

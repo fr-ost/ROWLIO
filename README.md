@@ -1,6 +1,6 @@
 # Rowlio
 
-**Rowlio: Free Web Scraper & Data Extractor** — *Turn any webpage into structured data.*
+**Rowlio: Web Scraper & Data Extractor** — *Turn any webpage into structured data.*
 A Product of [Unique Labs](https://www.uniquelabs.org). Developed by
 [Shahriar Ahmed](https://t.me/igfrostt).
 

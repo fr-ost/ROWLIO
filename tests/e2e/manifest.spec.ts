@@ -37,7 +37,7 @@ test.describe('production build', () => {
 
   test('store name and description fit Chrome Web Store limits', () => {
     const messages = JSON.parse(read('_locales/en/messages.json'));
-    expect(messages.extName.message).toBe('Rowlio: Free Web Scraper & Data Extractor');
+    expect(messages.extName.message).toBe('Rowlio: Web Scraper & Data Extractor');
     expect(messages.extName.message.length).toBeLessThanOrEqual(75);
     expect(messages.extDescription.message.length).toBeLessThanOrEqual(132);
   });
