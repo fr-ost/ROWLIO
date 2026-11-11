@@ -30,6 +30,7 @@ test('capture screenshots', async ({ connect, context, extensionId, serviceWorke
   await shop.target.locator('.product-card .price').first().click();
   await expect(shop.target.locator('[data-rowlio="record-count"]')).toBeVisible();
   await shop.target.mouse.move(640, 700);
+  await shop.target.waitForTimeout(700); // let the panel's entrance animation finish
   await shop.target.screenshot({ path: path.join(OUT, '02-visual-selector.png') });
   await shop.target.locator('[data-rowlio="picker-done"]').click();
 

@@ -41,6 +41,7 @@ Load `dist/` at `chrome://extensions` (Developer mode → Load unpacked).
 | `npm run icons` | Regenerates `public/icons/*.png` from the SVG in `scripts/generate-icons.mjs` (uses Playwright's Chromium). |
 | `npm run licenses` | Regenerates `public/THIRD_PARTY_NOTICES.txt`; fails on a missing or non-permissive licence. |
 | `npm run screenshots` | Regenerates `docs/screenshots/*.png` (1280×800) from the fixture site. The website uses the same images. |
+| `npm run store-assets` | Regenerates the Chrome Web Store graphics in `store-assets/` (store icon, promo tiles, five captioned 1280×800 screenshots) from `docs/screenshots/`. |
 | `npm run website` | Builds the marketing site from `website/` into `website-dist/` (Node built-ins only). |
 | `npm run website:preview` | Builds the site and serves it on `http://127.0.0.1:4321`. |
 
