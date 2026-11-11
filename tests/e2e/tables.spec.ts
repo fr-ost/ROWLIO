@@ -109,9 +109,15 @@ test.describe('table extraction', () => {
     // Search across all rows.
     await app.getByTestId('grid-search').fill('user19999@example.com');
     await expect(app.getByTestId('row-count')).toHaveText('1 of 20,000 rows');
-    // Export everything and count the lines.
     await app.getByTestId('grid-search').fill('');
     await expect(app.getByTestId('row-count')).toHaveText('20,000 rows');
+    // A transformation over 100,000 cells runs in the data worker and can be undone.
+    await app.getByTestId('clean-menu').click();
+    await app.getByRole('menuitem', { name: 'UPPERCASE' }).click();
+    await expect(app.getByTestId('data-grid').locator('[role="row"][aria-rowindex="2"] [role="gridcell"]').nth(1)).toHaveText('USER 1', { timeout: 20_000 });
+    await app.getByTestId('undo').click();
+    await expect(app.getByTestId('data-grid').locator('[role="row"][aria-rowindex="2"] [role="gridcell"]').nth(1)).toHaveText('User 1');
+    // Export everything and count the lines.
     await app.getByTestId('open-export').click();
     await app.getByTestId('export-format').selectOption('jsonl');
     const download = app.waitForEvent('download');

@@ -57,6 +57,12 @@ export function Onboarding() {
     if (open) setStep(0);
   }, [open]);
 
+  // Reflect the state on <html> once it is known, so automation never has to guess
+  // whether the introduction is about to appear.
+  useEffect(() => {
+    if (loaded) document.documentElement.dataset.onboarding = done ? 'done' : 'open';
+  }, [loaded, done]);
+
   if (!open) return null;
   const current = STEPS[step];
   const Icon = current.icon;

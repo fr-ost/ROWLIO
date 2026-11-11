@@ -70,10 +70,13 @@ export { expect };
 
 /** A fresh profile shows the first-run introduction; most tests are not about it. */
 export async function dismissOnboarding(app: Page): Promise<void> {
-  const skip = app.getByTestId('onboarding-skip');
-  await skip.waitFor({ state: 'visible', timeout: 10_000 });
-  await skip.click();
-  await expect(app.getByTestId('onboarding')).toHaveCount(0);
+  // Saved settings decide whether the introduction shows: wait until that is known.
+  const html = app.locator('html');
+  await expect(html).toHaveAttribute('data-onboarding', /open|done/, { timeout: 15_000 });
+  if ((await html.getAttribute('data-onboarding')) === 'open') {
+    await app.getByTestId('onboarding-skip').click();
+    await expect(html).toHaveAttribute('data-onboarding', 'done');
+  }
   await settingsSaved(app);
 }
 

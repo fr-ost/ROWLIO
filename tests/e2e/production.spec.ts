@@ -44,9 +44,11 @@ const test = base.extend<Fixtures>({
     if (!browser) throw new Error('No browser handle for the persistent context');
     await use(await browser.newBrowserCDPSession());
   },
-  clickToolbarIcon: async ({ browserSession, serviceWorker }, use) => {
+  clickToolbarIcon: async ({ browserSession, serviceWorker, context }, use) => {
     const extensionId = new URL(serviceWorker.url()).host;
     await use(async (page) => {
+      // The welcome tab opens shortly after install; let it appear before going on.
+      await expect.poll(() => context.pages().some((candidate) => candidate.url().includes('/app.html')), { timeout: 15_000 }).toBe(true);
       await page.bringToFront();
       const { targetInfos } = (await browserSession.send('Target.getTargets', { filter: [{ type: 'tab' }] })) as { targetInfos: { type: string; url: string; targetId: string }[] };
       const tab = targetInfos.find((info) => info.type === 'tab' && info.url === page.url());
@@ -56,28 +58,54 @@ const test = base.extend<Fixtures>({
   },
 });
 
-/** Can the extension run a script in the tab that is currently in front? */
-async function canScriptActiveTab(serviceWorker: Worker): Promise<{ ok: boolean; tabId: number; error?: string }> {
+interface TabProbe {
+  id: number;
+  /** Chrome only reveals a tab's address to an extension that has access to it. */
+  url: string;
+  ok: boolean;
+  error: string;
+}
+
+/** Try to run a script in every open tab and report what happened. */
+async function probeTabs(serviceWorker: Worker): Promise<TabProbe[]> {
   return serviceWorker.evaluate(async () => {
-    const [tab] = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
-    try {
-      await chrome.scripting.executeScript({ target: { tabId: tab.id! }, func: () => document.title });
-      return { ok: true, tabId: tab.id! };
-    } catch (error) {
-      return { ok: false, tabId: tab.id!, error: String(error) };
+    const out: { id: number; url: string; ok: boolean; error: string }[] = [];
+    for (const tab of await chrome.tabs.query({})) {
+      if (tab.id === undefined) continue;
+      try {
+        await chrome.scripting.executeScript({ target: { tabId: tab.id }, func: () => document.title });
+        out.push({ id: tab.id, url: tab.url ?? '', ok: true, error: '' });
+      } catch (error) {
+        out.push({ id: tab.id, url: tab.url ?? '', ok: false, error: String(error) });
+      }
     }
+    return out;
   });
+}
+
+/** Id of the tab showing `url`, once the extension has been granted access to it. */
+async function grantedTabId(serviceWorker: Worker, url: string): Promise<number> {
+  let id = -1;
+  await expect
+    .poll(async () => {
+      const tab = (await probeTabs(serviceWorker)).find((probe) => probe.ok && probe.url === url);
+      id = tab?.id ?? -1;
+      return id;
+    })
+    .toBeGreaterThan(0);
+  return id;
 }
 
 async function workspaceFor(context: BrowserContext, serviceWorker: Worker, tabId: number, hash: string): Promise<Page> {
   // The workspace tab opened at install time is reused, as in real use.
   const app = context.pages().find((page) => page.url().includes('/app.html')) ?? (await context.newPage());
   await app.goto(`chrome-extension://${new URL(serviceWorker.url()).host}/app.html?tab=${tabId}${hash}`);
-  // A fresh profile always starts with the introduction.
-  const skip = app.getByTestId('onboarding-skip');
-  await skip.waitFor({ state: 'visible', timeout: 10_000 });
-  await skip.click();
-  await expect(app.locator('html')).not.toHaveAttribute('data-saving', 'true');
+  // A fresh profile starts with the introduction (shown once saved settings are loaded).
+  const html = app.locator('html');
+  await expect(html).toHaveAttribute('data-onboarding', /open|done/, { timeout: 15_000 });
+  if ((await html.getAttribute('data-onboarding')) === 'open') await app.getByTestId('onboarding-skip').click();
+  await expect(html).toHaveAttribute('data-onboarding', 'done');
+  await expect(html).not.toHaveAttribute('data-saving', 'true');
   return app;
 }
 
@@ -87,14 +115,19 @@ test.describe('production build with real permissions', () => {
     await target.goto(`${SITE}/tables`);
     await target.bringToFront();
 
-    const before = await canScriptActiveTab(serviceWorker);
-    expect(before.ok).toBe(false);
-    expect(before.error).toMatch(/Cannot access contents of the page/);
+    // Before any click: no tab can be scripted, and no web address is visible to Rowlio.
+    const before = await probeTabs(serviceWorker);
+    expect(before.length).toBeGreaterThan(0);
+    expect(before.filter((probe) => probe.ok)).toEqual([]);
+    expect(before.some((probe) => /Cannot access contents of the page/.test(probe.error))).toBe(true);
+    expect(before.some((probe) => probe.url.startsWith('http'))).toBe(false);
     // Nothing was injected into the page either.
     expect(await target.evaluate(() => document.querySelector('[data-rowlio-overlay]'))).toBeNull();
 
     await clickToolbarIcon(target);
-    await expect.poll(async () => (await canScriptActiveTab(serviceWorker)).ok).toBe(true);
+    await grantedTabId(serviceWorker, target.url());
+    // Only that one tab was unlocked.
+    expect((await probeTabs(serviceWorker)).filter((probe) => probe.ok)).toHaveLength(1);
 
     // The real popup opened.
     await expect
@@ -109,8 +142,7 @@ test.describe('production build with real permissions', () => {
     const target = await context.newPage();
     await target.goto(`${SITE}/tables`);
     await clickToolbarIcon(target);
-    await expect.poll(async () => (await canScriptActiveTab(serviceWorker)).ok).toBe(true);
-    const { tabId } = await canScriptActiveTab(serviceWorker);
+    const tabId = await grantedTabId(serviceWorker, target.url());
 
     const app = await workspaceFor(context, serviceWorker, tabId, '#/tables');
     await expect(app.getByTestId('topbar')).toHaveAttribute('data-status', 'ready', { timeout: 15_000 });
@@ -145,8 +177,7 @@ test.describe('production build with real permissions', () => {
     const target = await context.newPage();
     await target.goto(`${SITE}/products`);
     await clickToolbarIcon(target);
-    await expect.poll(async () => (await canScriptActiveTab(serviceWorker)).ok).toBe(true);
-    const { tabId } = await canScriptActiveTab(serviceWorker);
+    const tabId = await grantedTabId(serviceWorker, target.url());
 
     const app = await workspaceFor(context, serviceWorker, tabId, '#/visual');
     await app.getByTestId('use-pattern').first().click();

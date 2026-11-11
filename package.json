@@ -6,15 +6,17 @@
   "type": "module",
   "scripts": {
     "dev": "node scripts/build.mjs --watch",
-    "build": "node scripts/build.mjs",
+    "build": "node scripts/licenses.mjs && node scripts/build.mjs",
     "build:e2e": "node scripts/build.mjs --e2e",
     "icons": "node scripts/generate-icons.mjs",
+    "licenses": "node scripts/licenses.mjs",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:e2e": "npm run build:e2e && playwright test --trace off",
-    "verify": "npm run typecheck && npm run test && npm run build && npm run test:e2e",
-    "package": "npm run build && node scripts/package.mjs"
+    "test:e2e": "npm run build && npm run build:e2e && playwright test --trace off",
+    "verify": "npm run typecheck && npm run test && npm run test:e2e",
+    "package": "npm run build && node scripts/package.mjs",
+    "screenshots": "npm run build:e2e && ROWLIO_SCREENSHOTS=1 playwright test tests/e2e/screenshots.spec.ts --trace off"
   },
   "engines": {
     "node": ">=20.19"
