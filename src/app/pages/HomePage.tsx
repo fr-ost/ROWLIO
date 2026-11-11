@@ -218,8 +218,9 @@ export function HomePage() {
             <Button onClick={() => navigate('/selectors')}>{t('Open Advanced Selectors')}</Button>
           </ActionCard>
 
-          <ActionCard icon={Layers} title={t('Multiple pages')} description={t('Follow next-page links or infinite scroll, within limits you set.')} count={scan ? (scan.hasNextPage ? 1 : 0) : null}>
+          <ActionCard icon={Layers} title={t('Multiple pages')} description={t('Follow next-page links or infinite scroll, within limits you set.')}>
             <Button onClick={() => navigate('/pagination')}>{t('Set up pagination')}</Button>
+            {scan?.hasNextPage ? <Badge tone="brand">{t('Next page detected')}</Badge> : null}
           </ActionCard>
         </div>
 

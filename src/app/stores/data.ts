@@ -3,6 +3,7 @@
 import { create } from 'zustand';
 import type { Dataset, TableData, TransformOp, TransformResult, ViewSpec } from '@/types';
 import { describeOp } from '@/data-processing/transforms';
+import { t } from '@/i18n';
 import { runTransform } from '@/workers/client';
 
 const HISTORY_LIMIT = 50;
@@ -204,7 +205,7 @@ export const useData = create<DataState>((set, get) => {
         id,
         (latest) => ({
           ...withData(latest, latest.original),
-          past: [...latest.past, { data: current(latest), label: 'Restore original' }].slice(-HISTORY_LIMIT),
+          past: [...latest.past, { data: current(latest), label: t('Restore original') }].slice(-HISTORY_LIMIT),
           future: [],
         }),
         true,

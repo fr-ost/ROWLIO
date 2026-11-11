@@ -11,7 +11,7 @@ brand clearance before submitting. Nothing here has been submitted.
 Rowlio: Free Web Scraper & Data Extractor
 ```
 
-**Summary** (max 132 characters — 127 used)
+**Summary** (max 132 characters — 126 used)
 
 ```
 Turn any webpage into structured data. Extract tables, lists, links and images to CSV, XLSX or JSON. Free forever, 100% local.

@@ -94,8 +94,11 @@ export function DataPage() {
       if (!id) return false;
       try {
         const result = await store.getState().apply(id, op);
-        if (result.changed > 0) toast.success(result.summary);
-        else toast.info(result.summary);
+        // Direct manipulations show their own result in the grid; a toast for every
+        // edited cell or moved column would only be noise.
+        const visibleInPlace = op.type === 'editCell' || op.type === 'moveColumn' || op.type === 'renameColumn';
+        if (result.changed === 0) toast.info(result.summary);
+        else if (!visibleInPlace) toast.success(result.summary);
         return true;
       } catch (error) {
         toast.error(t('That did not work'), error instanceof Error ? error.message : String(error));
