@@ -14,6 +14,10 @@ export interface ExportSettings {
 export interface Settings {
   theme: 'system' | 'light' | 'dark';
   onboardingDone: boolean;
+  /** Interface sound effects (synthesised locally, no audio files). */
+  sound: boolean;
+  /** Decorative motion. Off = calm interface; the OS "reduce motion" setting always wins. */
+  animations: boolean;
   export: ExportSettings;
   tables: TableOptions;
   pagination: PaginationSettings;
@@ -75,6 +79,8 @@ export const DEFAULT_PAGINATION: PaginationSettings = {
 export const DEFAULT_SETTINGS: Settings = {
   theme: 'system',
   onboardingDone: false,
+  sound: true,
+  animations: true,
   export: {
     csvDelimiter: ',',
     csvBom: true,

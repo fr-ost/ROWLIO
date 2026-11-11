@@ -5,6 +5,7 @@ import type { ExportOptions } from '@/types/transforms';
 import { DEFAULT_CHUNK_ROWS, delimitedChunks, toDelimited } from '@/export/csv';
 import { EXTENSION, MIME } from '@/export/filename';
 import { jsonChunks, jsonlChunks, toJson } from '@/export/json';
+import { htmlChunks, markdownChunks, toMarkdown } from '@/export/markup';
 import { buildXlsxAsync } from '@/export/xlsx';
 import { t } from '@/i18n';
 import { Pacer } from '@/utils/async';
@@ -13,6 +14,7 @@ export * from '@/export/csv';
 export * from '@/export/filename';
 export * from '@/export/formula';
 export * from '@/export/json';
+export * from '@/export/markup';
 export * from '@/export/xlsx';
 
 export interface ExportSheet {
@@ -48,6 +50,10 @@ function textChunks(data: TableData, options: ExportOptions): Generator<string> 
       return jsonChunks(data, { pretty: options.jsonPretty }, DEFAULT_CHUNK_ROWS);
     case 'jsonl':
       return jsonlChunks(data, DEFAULT_CHUNK_ROWS);
+    case 'markdown':
+      return markdownChunks(data, DEFAULT_CHUNK_ROWS);
+    case 'html':
+      return htmlChunks(data, { includeHeader: options.includeHeader, formulaGuard: options.formulaGuard }, DEFAULT_CHUNK_ROWS);
     case 'xlsx':
       throw new Error('XLSX is not a text format');
   }
@@ -117,10 +123,11 @@ export async function buildExport(
  */
 export function clipboardText(
   data: TableData,
-  format: 'tsv' | 'csv' | 'json',
+  format: 'tsv' | 'csv' | 'json' | 'markdown',
   opts: { formulaGuard: boolean; includeHeader: boolean },
 ): string {
   if (format === 'json') return toJson(data, { pretty: true });
+  if (format === 'markdown') return toMarkdown(data);
   return toDelimited(data, {
     delimiter: format === 'tsv' ? '\t' : ',',
     formulaGuard: opts.formulaGuard,

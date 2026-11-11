@@ -191,7 +191,7 @@ export function PaginationPage() {
 
   return (
     <ConnectionGate>
-      <div className="mx-auto flex max-w-5xl flex-col gap-4 p-6">
+      <div className="page-enter mx-auto flex max-w-5xl flex-col gap-4 p-6">
         <PageHeader
           title={t('Pagination')}
           description={t('Collect records across several pages or from an infinite-scroll page. You start every run, and it always stops at the limits you set.')}

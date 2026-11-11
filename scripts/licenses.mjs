@@ -12,8 +12,9 @@ const brand = JSON.parse(await fs.readFile(path.join(root, 'brand.config.json'),
 
 // Runtime dependencies, their runtime dependencies, plus Tailwind CSS: it is a build tool,
 // but the stylesheet it generates (base styles and utilities) is part of the bundle.
-const SHIPPED_BUILD_TOOLS = ['tailwindcss'];
-const ALLOWED = new Set(['MIT', 'ISC', 'BSD-2-Clause', 'BSD-3-Clause', 'Apache-2.0', '0BSD']);
+// The Inter typeface files are bundled as well.
+const SHIPPED_BUILD_TOOLS = ['tailwindcss', '@fontsource-variable/inter'];
+const ALLOWED = new Set(['MIT', 'ISC', 'BSD-2-Clause', 'BSD-3-Clause', 'Apache-2.0', '0BSD', 'OFL-1.1']);
 
 async function readPackage(name) {
   const dir = path.join(root, 'node_modules', name);

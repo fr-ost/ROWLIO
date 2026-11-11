@@ -133,7 +133,7 @@ export function TablesPage() {
 
   return (
     <ConnectionGate>
-      <div className="mx-auto flex max-w-6xl flex-col gap-4 p-6">
+      <div className="page-enter mx-auto flex max-w-6xl flex-col gap-4 p-6">
         <PageHeader
           title={t('Tables')}
           description={t('Every HTML table on the page, including ones rendered after load, inside scrollable areas, open shadow DOM and same-origin frames.')}

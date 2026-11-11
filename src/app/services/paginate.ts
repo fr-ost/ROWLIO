@@ -10,6 +10,7 @@ import { focusTargetTab, focusWorkspace, requireTarget, useTarget } from '@/app/
 import { toast } from '@/app/stores/ui';
 import { describeError, openDatasets, toDatasets } from './extract';
 import { onContentEvent } from './events';
+import { playSfx } from './sfx';
 
 async function waitForTabComplete(tabId: number, timeoutMs: number, signal: AbortSignal): Promise<void> {
   const started = Date.now();
@@ -114,6 +115,7 @@ export const useRun = create<RunState>((set, get) => ({
     const started = Date.now();
     set({ running: true, mode: settings.mode, progress: null, scroll: null, log: [], summary: null, maxScrolls: settings.maxScrolls, last: { spec, settings } });
     useTarget.getState().setBusy(true);
+    playSfx('start');
     const offStop = onContentEvent('hud:stop', () => controller?.abort());
     let summary: RunSummary;
 
@@ -189,6 +191,7 @@ export const useRun = create<RunState>((set, get) => ({
     }
 
     set({ running: false, summary });
+    playSfx(summary.reason === 'error' ? 'error' : summary.records > 0 ? 'complete' : 'warning');
     await focusWorkspace();
     // The page may have changed underneath us: refresh the connection quietly.
     void useTarget.getState().connect();

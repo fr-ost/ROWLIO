@@ -143,6 +143,7 @@ export function isExtractSpec(value: unknown): value is ExtractSpec {
     case 'breadcrumbs':
     case 'jsonld':
     case 'microdata':
+    case 'contacts':
       return true;
     default:
       return false;

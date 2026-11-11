@@ -7,6 +7,7 @@ import { collectTables, countDataTables, extractTables } from './tables';
 import { extractByRule, queryPage, type RowCache } from './selectors';
 import { extractLinks } from './links';
 import { extractImages } from './images';
+import { extractContacts } from './contacts';
 import { extractBreadcrumbs, extractHeadings, extractLists } from './lists';
 import { extractMetadata } from './metadata';
 import { countStructured, extractJsonLd, extractMicrodata, jsonLdBreadcrumbs } from './structured';
@@ -51,6 +52,8 @@ export async function runSpec(doc: Document, spec: ExtractSpec, ctx: RunContext 
       return [extractJsonLd(doc)];
     case 'microdata':
       return [extractMicrodata(doc)];
+    case 'contacts':
+      return [await extractContacts(doc, ctx.pacer)];
   }
 }
 

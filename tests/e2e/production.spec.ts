@@ -195,4 +195,37 @@ test.describe('production build with real permissions', () => {
     await expect.poll(() => target.evaluate(() => !!document.querySelector('[data-rowlio-overlay]'))).toBe(true);
     expect(await target.evaluate(() => document.querySelector('[data-rowlio-overlay]')!.shadowRoot)).toBeNull();
   });
+
+  test('a batch of URLs runs with click-granted access and never leaves the site', async ({ context, serviceWorker, clickToolbarIcon }) => {
+    const target = await context.newPage();
+    await target.goto(`${SITE}/products`);
+    await clickToolbarIcon(target);
+    const tabId = await grantedTabId(serviceWorker, target.url());
+
+    const visited: string[] = [];
+    target.on('framenavigated', (frame) => {
+      if (frame === target.mainFrame()) visited.push(frame.url());
+    });
+
+    const app = await workspaceFor(context, serviceWorker, tabId, '#/batch');
+    await app.getByTestId('batch-source').selectOption('links');
+    const elsewhere = `${SITE.replace('127.0.0.1', '127.0.0.2')}/tables`;
+    await app.getByTestId('batch-urls').fill([`${SITE}/tables`, elsewhere, `${SITE}/products?page=2`].join('\n'));
+    await app.getByTestId('batch-delay').fill('0');
+    await app.getByTestId('batch-start').click();
+
+    const summary = app.getByTestId('batch-summary');
+    await expect(summary).toBeVisible({ timeout: 45_000 });
+    await expect(summary).toContainText('from 2 of 3 pages');
+    // Without access to the other site its address is skipped rather than opened: opening it
+    // would end the access the user gave for this site.
+    await expect(app.getByTestId('batch-log')).toContainText('has no access to 127.0.0.2');
+    expect(visited.length).toBeGreaterThanOrEqual(2);
+    expect(visited.every((url) => url.startsWith(SITE))).toBe(true);
+
+    // Access is intact afterwards: a normal extraction on the last page still works.
+    await app.goto(app.url().replace(/#.*/, '#/visual'));
+    await app.getByTestId('use-pattern').first().click();
+    await expect(app.getByTestId('rule-preview')).toContainText('9 records on this page');
+  });
 });

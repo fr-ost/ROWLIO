@@ -42,7 +42,7 @@ test.describe('production build', () => {
     expect(messages.extDescription.message.length).toBeLessThanOrEqual(132);
   });
 
-  test('shipped code contains no network calls, eval or remote URLs', () => {
+  test('shipped code contains no network calls or eval, and loads no remote resources', () => {
     const files = ['background.js', 'content.js', ...fs.readdirSync(path.join(dist, 'assets')).filter((name) => name.endsWith('.js')).map((name) => `assets/${name}`)];
     for (const file of files) {
       const code = read(file);
@@ -54,6 +54,23 @@ test.describe('production build', () => {
       expect(code, `${file}: new Function`).not.toMatch(/new\s+Function\s*\(/);
       expect(code, `${file}: importScripts`).not.toMatch(/importScripts\s*\(/);
     }
+    // Pages and stylesheets reference bundled files only: no remote scripts, styles, fonts or images.
+    for (const page of ['app.html', 'popup.html']) {
+      expect(read(page), `${page}: remote resource`).not.toMatch(/\b(src|href)\s*=\s*["']?(https?:)?\/\//i);
+    }
+    const styles = fs.readdirSync(path.join(dist, 'assets')).filter((name) => name.endsWith('.css'));
+    expect(styles.length).toBeGreaterThan(0);
+    for (const name of styles) {
+      const css = read(`assets/${name}`);
+      expect(css, `${name}: remote url()`).not.toMatch(/url\(\s*["']?(https?:)?\/\//i);
+      expect(css, `${name}: @import`).not.toMatch(/@import/i);
+    }
+    // The typeface ships inside the extension.
+    expect(fs.readdirSync(path.join(dist, 'assets')).some((name) => /^inter-.*\.woff2$/.test(name))).toBe(true);
+    // The only outside addresses the interface links to are the two credit links.
+    const brand = JSON.parse(fs.readFileSync(path.resolve(dist, '..', 'brand.config.json'), 'utf8'));
+    expect(brand.urls.homepage).toBe('https://www.uniquelabs.org');
+    expect(brand.developer.url).toBe('https://t.me/igfrostt');
     // The content script is a single classic script without imports.
     expect(read('content.js')).not.toMatch(/^\s*import\s/m);
     // The E2E-only switches must not be enabled in production.

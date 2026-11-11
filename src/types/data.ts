@@ -12,6 +12,7 @@ export type ExtractionMethod =
   | 'metadata'
   | 'jsonld'
   | 'microdata'
+  | 'contacts'
   | 'import';
 
 /** A column has a stable id (used for widths, selection, transforms) and a display name. */

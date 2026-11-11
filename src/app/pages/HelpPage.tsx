@@ -5,6 +5,7 @@ import { APP_VERSION, brand } from '@/config/brand';
 import { t } from '@/i18n';
 import { useUi } from '@/app/stores/ui';
 import { Logo } from '@/app/components/Shell';
+import { Aurora, Credits } from '@/app/components/fx';
 import { Button, Card, Kbd, PageHeader } from '@/app/components/ui';
 
 interface Topic {
@@ -48,6 +49,22 @@ const TOPICS: Topic[] = [
       'Open Pagination, choose what to extract, and set the limits: maximum pages or scrolls, records, delay.',
       'Press Start. The page is brought to the front while {name} works; press Stop at any time and keep what was collected.',
       'The run ends at your limits, on the last page, or when a page adds nothing new. The reason is always shown.',
+    ],
+  },
+  {
+    title: 'Extract a list of pages (Batch URLs)',
+    steps: [
+      'Set up an extraction that works on one page: a selector rule, a recipe, tables, metadata or contacts.',
+      'Open Batch URLs and paste the page addresses, one per line, or take them from a URL column of data you already extracted (for example the product links of a listing).',
+      'Press Visit. Each page is opened in the connected tab in turn; every row gets a “Source URL” column. Pages that fail are listed and the rest continue.',
+      '{name} can only read pages on the site you invoked it on, unless you granted access to another site.',
+    ],
+  },
+  {
+    title: 'Import a file',
+    steps: [
+      'In the Data Preview press Import and choose a CSV, TSV, JSON or JSON Lines file, or a {name} project file.',
+      'The file is read by your browser and opens as a dataset you can clean, combine with extracted data and export. It is not uploaded.',
     ],
   },
   {
@@ -111,7 +128,7 @@ export function HelpPage() {
   const name = { name: brand.name };
 
   return (
-    <div className="mx-auto flex max-w-4xl flex-col gap-4 p-6">
+    <div className="page-enter mx-auto flex max-w-4xl flex-col gap-4 p-6">
       <PageHeader title={t('Help & About')} description={brand.positioning} />
 
       <Card className="p-5">
@@ -213,9 +230,10 @@ export function HelpPage() {
         <p className="mt-3 text-xs text-zinc-500">{t('Use {name} only on content you are allowed to access, and respect each website’s terms and applicable law.', name)}</p>
       </Card>
 
-      <Card className="flex flex-wrap items-center gap-4 p-5" data-testid="about">
-        <Logo className="size-11" />
-        <div className="min-w-0 flex-1">
+      <Card className="relative flex flex-wrap items-center gap-4 overflow-hidden p-5" data-testid="about">
+        <Aurora />
+        <Logo className="relative size-12 drop-shadow-[0_6px_14px_rgb(16_169_116/0.5)]" />
+        <div className="relative min-w-0 flex-1">
           <div className="text-base font-semibold">
             {brand.name} <span className="text-xs font-normal text-zinc-500">{t('version {version}', { version: APP_VERSION })}</span>
           </div>
@@ -223,8 +241,12 @@ export function HelpPage() {
             {brand.tagline} · {brand.attribution}
           </div>
           <div className="mt-1 text-xs text-zinc-500">{brand.motto}</div>
+          <div className="mt-2 text-xs">
+            <span className="text-zinc-500">{brand.copyright}. </span>
+            <Credits />
+          </div>
         </div>
-        <ul className="flex flex-wrap gap-1.5 text-xs">
+        <ul className="relative flex flex-wrap gap-1.5 text-xs">
           {brand.promises.map((promise) => (
             <li key={promise} className="rounded-full bg-brand-50 px-2.5 py-1 font-medium text-brand-800 dark:bg-brand-950 dark:text-brand-300">
               {promise}

@@ -53,13 +53,36 @@ itself blocks them from connecting to any remote server. The build is checked fo
 APIs by an automated test (see [TESTING.md](TESTING.md)).
 
 Note: the *page you are extracting from* continues to behave as it normally does. When
-Rowlio follows a next-page link or scrolls an infinite list for you, the website loads
-its own content exactly as if you had clicked or scrolled yourself.
+Rowlio follows a next-page link, scrolls an infinite list, or opens the addresses in a
+list you gave it (Batch URLs), the website loads its own content exactly as if you had
+clicked, scrolled or typed the address yourself.
+
+**Links that leave the extension.** The interface shows two credit links, to the Unique
+Labs website (`https://www.uniquelabs.org`) and to the developer's Telegram profile
+(`https://t.me/igfrostt`). They are ordinary links: nothing is requested from those sites
+unless you click one, in which case Chrome opens it in a new tab like any other link (with
+`rel="noopener noreferrer"`, so the destination learns nothing about the extension).
+
+**Files you import.** A CSV, TSV, JSON or JSON Lines file you open with *Import* is read
+by the browser from your disk. It is not uploaded.
+
+**Sound and typeface.** Sound effects are generated on your device with the Web Audio
+API; there are no audio files and nothing is downloaded. The interface typeface (Inter)
+is a font file inside the extension.
 
 ## Third parties
 
-None. No third-party service receives data. The third-party libraries bundled in the
-extension (listed in the README) run locally and make no network requests.
+None. No third-party service receives data. The third-party libraries and the font
+bundled in the extension (listed in the README) run locally and make no network requests.
+
+## The website
+
+The marketing website in this repository (`website/`) is separate from the extension. It
+is static: no cookies, no analytics, nothing loaded from third parties; a sound on / off
+preference is kept in the browser's local storage. Whoever hosts it (for example Vercel)
+will, like any web host, see ordinary request data such as IP addresses in its server
+logs. That is outside Rowlio's control and should be covered by the published privacy
+policy.
 
 ## Children, sensitive data, regulated data
 

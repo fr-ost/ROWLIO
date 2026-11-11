@@ -8,6 +8,7 @@ access beyond a fixture site served from `127.0.0.1`.
 | Unit | Vitest + jsdom | `tests/unit/` | The extraction engine, detection heuristics, pagination and scroll logic, data cleaning, exports, storage and input validation behave correctly on realistic HTML and data. |
 | End-to-end (test build) | Playwright + Chromium | `tests/e2e/*.spec.ts` | Complete user workflows through the real extension UI in a real browser. |
 | End-to-end (production build) | Playwright + DevTools protocol | `tests/e2e/production.spec.ts`, `manifest.spec.ts` | The build that ships works with **real permissions**: no access before the toolbar button is clicked, full function after. |
+| Website | Playwright + Chromium | `tests/e2e/website.spec.ts` | The marketing site builds from the brand configuration, renders without errors, requests nothing from other origins and fits a phone screen. |
 
 ## Running
 
@@ -42,8 +43,8 @@ Last full run: **all passing**.
 
 | Suite | Files | Tests | Result |
 |---|---|---|---|
-| Unit | 15 | 862 | 862 passed |
-| End-to-end | 11 | 53 | 52 passed, 1 skipped (the screenshot generator, which only runs on request) |
+| Unit | 16 | 888 | 888 passed |
+| End-to-end | 13 | 65 | 64 passed, 1 skipped (the screenshot generator, which only runs on request) |
 | Type check | — | — | 0 errors (`strict`) |
 | `npm audit` | — | — | 0 known vulnerabilities |
 
@@ -69,6 +70,7 @@ Vitest 5.1, jsdom 31, TypeScript 7.0.
 | `export-build.test.ts` | Blob output per format, BOM, progress, multi-sheet rules |
 | `storage.test.ts` | Projects and recipes CRUD on `fake-indexeddb`, transactions, import validation, settings merge, delete all |
 | `guards-utils.test.ts` | Validation of untrusted messages / recipes / datasets, URL helpers and patterns, restricted pages, text helpers, i18n, async helpers, brand config |
+| `new-features.test.ts` | Regex extraction, fill down, add column / row, column summary, Markdown and HTML export (escaping, formula guard), file import (delimiters, quoting, BOM, JSON shapes, JSON Lines, project files, errors), contacts (mailto / tel links, text, social profiles, de-duplication), batch runner with a scripted transport (limits, failures, cancellation, source column, URL list normalisation), credits in the brand configuration |
 
 ## End-to-end tests
 
@@ -88,7 +90,9 @@ JSON-LD and microdata.
 | `content.spec.ts` | Links and filters, images (lazy, `srcset`, `<picture>`), lists / headings / breadcrumbs / metadata / JSON-LD / microdata together |
 | `data.spec.ts` | Edit / undo / redo / restore, sort / search / filter, find & replace, number extraction, split, case, remove rows / columns, duplicates, rename / reorder, keyboard editing |
 | `app.spec.ts` | Save / reopen / rename / export / delete / import a project, recipes (save, offer on matching page, run, delete, pagination pre-fill), onboarding, no page connected, restricted pages, no host permission, settings persistence + theme, popup hand-over, page scripts cannot message the extension |
-| `manifest.spec.ts` | Production manifest (permissions, CSP, store limits) and bundles free of network / eval APIs |
+| `features.spec.ts` | Batch URLs (pasted list with an invalid line, a duplicate and an address on another site; addresses taken from a URL column; page limit), CSV import with Bengali text and a rejected broken file, contacts, regex extraction + column summary + added column + Markdown download, credit links, sound and animation switches and their persistence, Home counters |
+| `website.spec.ts` | Website build: no placeholders left, credits and links, download present, every image loads, no third-party requests, no page errors, tabs and sound switch, no sideways scrolling at phone width |
+| `manifest.spec.ts` | Production manifest (permissions, CSP, store limits); scripts free of network / eval APIs; pages and stylesheets free of remote resources; bundled font present |
 | `production.spec.ts` | Production build with real toolbar clicks (below) |
 | `smoke.spec.ts` | The extension loads and connects |
 
@@ -113,6 +117,8 @@ verifies that:
 - access is withdrawn on another site, and the workspace says so without offering the
   old site;
 - three-page pagination works with click-granted access only;
+- a batch of URLs runs with click-granted access only, skips an address on another site
+  instead of opening it, never navigates the tab off the site, and leaves access intact;
 - the in-page overlay's shadow root is closed (`shadowRoot === null` from the page).
 
 ### Independent checks of exported files
@@ -137,6 +143,17 @@ Be aware of these gaps:
   covered.
 - **Column resize and header drag-and-drop** by mouse (their menu equivalents are tested).
 - **Accessibility**: no automated audit (axe) or screen-reader pass yet.
+- **Sound output**: the switch and its persistence are tested; what the effects sound
+  like, and how they behave across audio devices, has not been checked by ear (the
+  environment this was built in has no audio output).
+- **Animation quality and frame rate**: animations were reviewed in screenshots only, not
+  on a real display. Confirm smoothness on a low-end machine.
+- **Batch runs across sites with granted access**: needs Chrome's permission prompt,
+  which automation cannot answer. The skip path (no access) is covered.
+- **The Vercel deployment itself**: the website build is tested locally; no deployment
+  was made from this environment.
+- **Importing very large files** (tens of megabytes): the parser reads the whole file
+  into memory.
 - **Other browsers and platforms**: tested on Chromium 153 on Linux, headless only.
 - **Datasets beyond ~100,000 rows** in the UI, and memory behaviour on low-end machines.
 - **`file://` pages**, PDF viewer pages, and pages inside frames.
@@ -153,6 +170,13 @@ Be aware of these gaps:
    another attempt.
 6. Infinite scroll on a real feed with a limit of 10 scrolls.
 7. Press `Alt+Shift+W` and `Alt+Shift+S` on a page.
+7a. Batch URLs: extract product links from a listing, send the URL column to Batch URLs,
+    run "Page metadata" on 5 of them with a 1-second delay; press Stop on another attempt.
+7b. Import a CSV exported from Excel; export it as Markdown and as HTML.
+7c. Listen to the sound effects (Settings → Play a test sound) and switch sound and
+    animations off and on. Check the interface with the system "reduce motion" setting.
+7d. `npm run website:preview`, click through the site, download the archive from it and
+    load it unpacked.
 8. Open `chrome://extensions` and click the icon: the popup explains the page cannot be
    read.
 9. Settings → Delete all saved data, then confirm Projects and Recipes are empty.

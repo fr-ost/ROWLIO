@@ -8,6 +8,8 @@ export const EXTENSION: Record<ExportFormat, string> = {
   json: 'json',
   jsonl: 'jsonl',
   xlsx: 'xlsx',
+  markdown: 'md',
+  html: 'html',
 };
 
 export const MIME: Record<ExportFormat, string> = {
@@ -16,6 +18,8 @@ export const MIME: Record<ExportFormat, string> = {
   json: 'application/json;charset=utf-8',
   jsonl: 'application/x-ndjson;charset=utf-8',
   xlsx: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  markdown: 'text/markdown;charset=utf-8',
+  html: 'text/html;charset=utf-8',
 };
 
 function two(value: number): string {

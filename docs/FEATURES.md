@@ -88,6 +88,16 @@ download or fetch images.
   reported.
 - Schema.org microdata with nested items.
 
+### Contacts — Tested
+
+Email addresses (from `mailto:` links and from visible text), phone numbers (from `tel:`
+links and from text in international or grouped formats, including Bengali digits) and
+social profile links (Facebook, X / Twitter, LinkedIn, Instagram, YouTube, TikTok,
+GitHub, Telegram, WhatsApp, Pinterest, Threads, Discord). Columns: type, value, label,
+where it was found, URL. "Share this" buttons and bare network homepages are ignored, and
+duplicates are merged. Only what the page already shows or links to is collected; nothing
+is looked up elsewhere.
+
 ### Pagination — Tested
 
 - Next-page **links and buttons** (text in ~30 languages, `rel="next"`, ARIA labels,
@@ -108,6 +118,26 @@ download or fetch images.
 - Collects while scrolling, so virtualised lists that remove earlier items are supported.
 - Stop at any time and keep what was collected; scroll position is restored.
 - When scrolling stops producing content, the run ends and says so.
+
+### Batch URLs — Tested
+
+- Run one extraction over a **list of page addresses you supply**: paste them, or take
+  them from a URL column of data that is already open (for example product links you just
+  extracted).
+- What runs on each page: the current rule, a saved recipe, all tables, metadata,
+  JSON-LD, contacts, links or images.
+- Invalid lines and duplicates are counted and left out before the run starts.
+- Bounded and paced: a maximum number of pages (default 50) and a delay between pages.
+  Start / Stop in the workspace and on the page, progress and a per-page log.
+- A page that fails (or has no records) is logged and the run carries on.
+- Every row gets a **Source URL** column.
+- The pages are opened one after another in the connected tab, visibly. Addresses on a
+  different site than the one you invoked Rowlio on are **skipped with a reason** unless
+  you have granted access to that site, because leaving the site would withdraw Chrome's
+  click-granted access.
+
+This is a bounded list runner, not a crawler: it never discovers or follows links on its
+own.
 
 ## Data preview — Tested
 
@@ -134,7 +164,13 @@ rows · UPPER / lower / Title / Sentence case · extract numbers (understands `1
 `1.234,56`, Bengali and other Unicode digits) · parse dates when unambiguous (ambiguous
 ones such as `03/04/2024` are left untouched and counted) · normalise URLs · find and
 replace (text or regex, per column or everywhere) · split a column by a delimiter ·
-combine columns · keep rows where a column is empty / not empty · first row ⇄ header.
+combine columns · keep rows where a column is empty / not empty · first row ⇄ header ·
+**extract by pattern** (a regular expression; the first capture group or the whole match,
+into the same column or a new one) · **fill down** (empty cells take the value above) ·
+**add column** (empty, row numbers or a fixed value) · **add row**.
+
+**Column summary**: filled / empty / distinct counts, shortest and longest value, the
+most frequent values, and for numeric columns sum, average, median, minimum and maximum.
 
 Every operation reports what it actually changed. **Undo / redo** (50 steps) and
 **Restore original** are always available; the extracted data is never overwritten.
@@ -148,16 +184,27 @@ Every operation reports what it actually changed. **Undo / redo** (50 steps) and
 | JSON | Array of objects, key order = column order, optional pretty-print |
 | JSON Lines | One object per line |
 | XLSX | One sheet per dataset; bold frozen header, auto-filter, column widths; optional typed numbers and ISO dates |
-| Clipboard | TSV (paste into Excel / Sheets), CSV or JSON |
+| Markdown | GitHub-style table; pipes, markup and line breaks in cells are escaped |
+| HTML | A self-contained page with one table; cell text is escaped, no scripts, no remote assets |
+| Clipboard | TSV (paste into Excel / Sheets), CSV, JSON or a Markdown table |
 
 - Export all rows, the filtered rows, or the selected rows; one dataset or all open ones.
 - Real progress (rows written) for large exports, which run in a Web Worker.
-- **Formula-injection protection**: in CSV, TSV and clipboard output, cells starting
-  with `=`, `+`, `-`, `@`, tab or carriage return get a leading apostrophe (plain numbers
-  such as `-12.5` are left alone). In XLSX, text is always stored as text.
+- **Formula-injection protection**: in CSV, TSV, HTML and clipboard (TSV / CSV) output,
+  cells starting with `=`, `+`, `-`, `@`, tab or carriage return get a leading apostrophe
+  (plain numbers such as `-12.5` are left alone). HTML is included because spreadsheet
+  applications open HTML tables as well. In XLSX, text is always stored as text.
 - Format limits are reported, not silently applied (for example Excel's 32,767 characters
   per cell and 1,048,576 rows per sheet).
 - Unicode verified end to end with Bengali text and emoji.
+
+## Import — Tested
+
+Open a file from your computer in the Data Preview: CSV and TSV (delimiter detected among
+comma, semicolon, tab and pipe; quoted fields, embedded line breaks, optional BOM), JSON
+(an array of objects, an array of arrays, or an object holding one), JSON Lines, and
+Rowlio project files. The file is read by the browser and is not uploaded anywhere.
+Excel (`.xlsx`) files are not supported.
 
 ## Projects and recipes — Tested
 
@@ -174,11 +221,22 @@ Every operation reports what it actually changed. **Undo / redo** (50 steps) and
 ## Interface
 
 - Workspace sections: Home / Extract, Tables, Visual Selector, Advanced Selectors,
-  Pagination, Data Preview, Projects, Saved Recipes, Settings, Help & About.
+  Pagination, Batch URLs, Data Preview, Projects, Saved Recipes, Settings, Help & About.
+- Home shows what the connected page contains (tables, repeating lists, links, images,
+  headings, structured data) as live counters. — Tested
 - Popup: current site, counts (tables, lists, links, images), quick actions, open
   workspace. — Tested
 - First-run introduction (five steps, skippable, replayable). — Tested
 - Light / dark / system theme; sidebar collapses on narrow windows. — Tested (theme)
+- **Motion**: page and card entrances, drifting colour fields, pointer spotlights,
+  counting numbers, animated progress and toasts. One switch turns all of it off, and
+  `prefers-reduced-motion` always wins. — Tested (the switch and its persistence)
+- **Sound effects**: short tones for clicks, navigation, success, completion, warnings
+  and errors, synthesised with the Web Audio API (no audio files). One switch turns them
+  off. — Implemented; the switch is tested, the audio output itself is not (headless
+  browsers have no audible output to assert on)
+- **Credits**: "A Product of Unique Labs. Developed by Shahriar Ahmed." with links, in the
+  sidebar, the popup and Help & About. — Tested
 - Empty states and actionable error messages on every screen.
 - Keyboard shortcuts `Alt+Shift+R / W / S`. — Implemented (Chrome offers no way to
   trigger extension commands from automated tests)
@@ -204,11 +262,12 @@ Unicode-safe throughout.
 These are deliberately out of the first release. The architecture leaves room for them
 (see [ARCHITECTURE.md](ARCHITECTURE.md)).
 
-- Scheduled extraction, multiple-tab extraction, batch URL lists.
+- Scheduled extraction, extraction across several tabs at once.
+- Batch URL lists that span several sites in one run without granting access to each.
 - Local OCR, PDF parsing, page snapshots.
 - Downloading image files (only their addresses are extracted).
 - RDFa structured data (JSON-LD and microdata are supported).
-- Importing CSV / XLSX files into the workspace.
+- Importing Excel (`.xlsx`) files (CSV, TSV, JSON and JSON Lines can be imported).
 - A Chrome side panel version of the workspace.
 - Column virtualisation in the data grid (rows are virtualised; hundreds of columns will
   render slowly).

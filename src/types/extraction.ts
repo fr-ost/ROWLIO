@@ -112,7 +112,8 @@ export type ExtractSpec =
   | { kind: 'breadcrumbs' }
   | { kind: 'metadata'; options: MetaOptions }
   | { kind: 'jsonld' }
-  | { kind: 'microdata' };
+  | { kind: 'microdata' }
+  | { kind: 'contacts' };
 
 export type ExtractKindName = ExtractSpec['kind'];
 

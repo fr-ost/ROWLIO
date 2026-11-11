@@ -8,12 +8,14 @@ import { runIntent } from './services/actions';
 import { useData } from './stores/data';
 import { useRule } from './stores/rule';
 import { focusWorkspace, initTargetListeners, useTarget } from './stores/target';
-import { applyTheme, navigate, toast, useUi } from './stores/ui';
+import { applyFeel, applyTheme, navigate, toast, useUi } from './stores/ui';
+import { installUiSounds, playSfx } from './services/sfx';
 import { HomePage } from './pages/HomePage';
 import { TablesPage } from './pages/TablesPage';
 import { VisualPage } from './pages/VisualPage';
 import { SelectorsPage } from './pages/SelectorsPage';
 import { PaginationPage } from './pages/PaginationPage';
+import { BatchPage } from './pages/BatchPage';
 import { DataPage } from './pages/DataPage';
 import { ProjectsPage } from './pages/ProjectsPage';
 import { RecipesPage } from './pages/RecipesPage';
@@ -39,6 +41,7 @@ function start(): void {
   started = true;
   initMessageRouter();
   initTargetListeners();
+  installUiSounds();
   void useUi.getState().loadSettings();
 
   onBindRequest((message) => {
@@ -53,6 +56,7 @@ function start(): void {
     useRule.getState().setRule(payload.rule, 'visual', { matched: payload.count, sourceUrl: payload.url });
     navigate('/visual');
     void focusWorkspace();
+    playSfx('pop');
     toast.success(t('{count} records selected with {fields} fields', { count: payload.count, fields: payload.rule.fields.length }), t('Review the preview, then extract.'));
   });
   onContentEvent('picker:cancelled', (payload) => {
@@ -87,6 +91,7 @@ const PAGES = {
   '/visual': VisualPage,
   '/selectors': SelectorsPage,
   '/pagination': PaginationPage,
+  '/batch': BatchPage,
   '/data': DataPage,
   '/projects': ProjectsPage,
   '/recipes': RecipesPage,
@@ -97,11 +102,17 @@ const PAGES = {
 export function App() {
   const route = useUi((state) => state.route);
   const theme = useUi((state) => state.settings.theme);
+  const sound = useUi((state) => state.settings.sound);
+  const animations = useUi((state) => state.settings.animations);
   const Page = PAGES[route];
 
   useEffect(() => {
     start();
   }, []);
+
+  useEffect(() => {
+    applyFeel({ sound, animations });
+  }, [sound, animations]);
 
   useEffect(() => {
     applyTheme(theme);
@@ -113,7 +124,7 @@ export function App() {
   }, [theme]);
 
   return (
-    <div className="flex h-screen overflow-hidden">
+    <div className="app-surface flex h-screen overflow-hidden">
       <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:rounded-md focus:bg-white focus:px-3 focus:py-2 focus:text-sm focus:shadow">
         {t('Skip to content')}
       </a>
@@ -121,7 +132,10 @@ export function App() {
       <div className="flex min-w-0 flex-1 flex-col">
         <TopBar />
         <main id="main" tabIndex={-1} className="min-h-0 flex-1 overflow-auto outline-none" data-route={route}>
-          <Page />
+          {/* Keyed by route so each page plays its entrance once. */}
+          <div key={route} className="fade-in h-full">
+            <Page />
+          </div>
         </main>
       </div>
       <Toasts />

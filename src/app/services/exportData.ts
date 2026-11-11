@@ -70,7 +70,7 @@ export async function exportSheets(
 
 export async function copyToClipboard(
   data: TableData,
-  format: 'tsv' | 'csv' | 'json',
+  format: 'tsv' | 'csv' | 'json' | 'markdown',
   options: { formulaGuard: boolean; includeHeader: boolean },
 ): Promise<number> {
   const text = clipboardText(data, format, options);
@@ -94,4 +94,6 @@ export const FORMAT_LABELS: Record<ExportFormat, string> = {
   json: 'JSON',
   jsonl: 'JSON Lines',
   tsv: 'TSV',
+  markdown: 'Markdown table',
+  html: 'HTML table',
 };

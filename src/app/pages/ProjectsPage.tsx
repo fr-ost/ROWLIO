@@ -154,7 +154,7 @@ export function ProjectsPage() {
   ];
 
   return (
-    <div className="mx-auto flex max-w-6xl flex-col gap-4 p-6">
+    <div className="page-enter mx-auto flex max-w-6xl flex-col gap-4 p-6">
       <PageHeader
         title={t('Projects')}
         description={t('Extraction results you chose to save. They are stored in this browser only and you can delete them at any time.')}

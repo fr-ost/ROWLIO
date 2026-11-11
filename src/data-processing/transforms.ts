@@ -686,6 +686,69 @@ function demoteHeader(data: TableData): TransformResult {
   };
 }
 
+function extractRegex(data: TableData, op: Extract<TransformOp, { type: 'extractRegex' }>): TransformResult {
+  if (op.pattern === '') throw new Error(t('Enter a pattern to look for.'));
+  const index = columnIndex(data, op.column);
+  const name = data.columns[index]!.name;
+  const regex = compileUserRegex(op.pattern, op.caseSensitive ? '' : 'i');
+  const result = deriveColumn(data, index, op.target, t('match'), (value) => {
+    const match = regex.exec(value);
+    if (!match) return null;
+    // With a capture group the group is the result; otherwise the whole match.
+    return match[1] ?? match[0];
+  });
+  const { converted, missed } = result;
+  const rest =
+    missed > 0
+      ? op.target === 'new'
+        ? tn(missed, '{count} cell without a match was left empty', '{count} cells without a match were left empty')
+        : tn(missed, '{count} cell without a match was left unchanged', '{count} cells without a match were left unchanged')
+      : '';
+  if (converted === 0) return unchanged(data, sentences(t('The pattern matched nothing in "{name}"', { name }), rest));
+  const main = tn(converted, 'Extracted the match from {count} cell', 'Extracted the match from {count} cells');
+  return { data: result.data, changed: converted, summary: sentences(main, rest) };
+}
+
+function fillDown(data: TableData, columns: string[] | undefined): TransformResult {
+  const indexes = columnIndexes(data, columns);
+  const last = new Map<number, string>();
+  let changed = 0;
+  let rows: Row[] | null = null;
+  for (let r = 0; r < data.rows.length; r++) {
+    const row = data.rows[r]!;
+    let cells: string[] | null = null;
+    for (const c of indexes) {
+      const value = row.cells[c] ?? '';
+      if (!isBlank(value)) {
+        last.set(c, value);
+      } else if (last.has(c)) {
+        cells ??= row.cells.slice();
+        cells[c] = last.get(c)!;
+        changed += 1;
+      }
+    }
+    if (cells) {
+      rows ??= data.rows.slice();
+      rows[r] = { id: row.id, cells };
+    }
+  }
+  if (!rows) return unchanged(data, t('No empty cells had a value above them'));
+  return { data: { columns: data.columns, rows }, changed, summary: tn(changed, 'Filled {count} empty cell from the row above', 'Filled {count} empty cells from the rows above') };
+}
+
+function addColumn(data: TableData, op: Extract<TransformOp, { type: 'addColumn' }>): TransformResult {
+  const name = collapseWhitespace(op.name);
+  if (!name) throw new Error(t('Give the new column a name.'));
+  const values = data.rows.map((_, index) => (op.fill === 'rowNumber' ? String(index + 1) : op.fill === 'value' ? (op.value ?? '') : ''));
+  return { data: withColumnInserted(data, data.columns.length, name, values), changed: 1, summary: t('Added the column "{name}"', { name }) };
+}
+
+function addRow(data: TableData): TransformResult {
+  if (data.columns.length === 0) throw new Error(t('Add a column first.'));
+  const row: Row = { id: nextRowId(data), cells: data.columns.map(() => '') };
+  return { data: { columns: data.columns, rows: data.rows.concat([row]) }, changed: 1, summary: t('Added an empty row at the end') };
+}
+
 /**
  * Apply one cleaning operation. Throws an Error with a user-presentable message for
  * invalid input (unknown column, empty search text, invalid regular expression, …).
@@ -819,6 +882,18 @@ export function applyTransform(data: TableData, op: TransformOp): TransformResul
     case 'demoteHeader':
       return demoteHeader(data);
 
+    case 'extractRegex':
+      return extractRegex(data, op);
+
+    case 'fillDown':
+      return fillDown(data, op.columns);
+
+    case 'addColumn':
+      return addColumn(data, op);
+
+    case 'addRow':
+      return addRow(data);
+
     default: {
       const unknown: never = op;
       throw new Error(t('Unknown operation: {type}', { type: String((unknown as { type?: unknown }).type) }));
@@ -882,5 +957,13 @@ export function describeOp(op: TransformOp): string {
       return t('Use first row as header');
     case 'demoteHeader':
       return t('Move header to first row');
+    case 'extractRegex':
+      return t('Extract by pattern');
+    case 'fillDown':
+      return t('Fill down');
+    case 'addColumn':
+      return t('Add column');
+    case 'addRow':
+      return t('Add row');
   }
 }

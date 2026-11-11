@@ -1,6 +1,6 @@
 // Settings: defaults, site access, and control over everything stored on this device.
 import { useCallback, useEffect, useState } from 'react';
-import { Keyboard, ShieldCheck, Trash2 } from 'lucide-react';
+import { Keyboard, ShieldCheck, Trash2, Volume2 } from 'lucide-react';
 import type { Settings } from '@/types';
 import { brand } from '@/config/brand';
 import { t } from '@/i18n';
@@ -14,6 +14,7 @@ import { resetSettings } from '@/storage/settings';
 import { useData } from '@/app/stores/data';
 import { toast, useUi } from '@/app/stores/ui';
 import { formatBytes } from '@/app/services/exportData';
+import { playSfx } from '@/app/services/sfx';
 import { Button, Card, Checkbox, ConfirmDialog, Field, Input, Notice, PageHeader, Segmented } from '@/app/components/ui';
 
 function Section({ title, description, children }: { title: string; description?: string; children: React.ReactNode }) {
@@ -91,7 +92,7 @@ export function SettingsPage() {
   };
 
   return (
-    <div className="mx-auto flex max-w-4xl flex-col gap-4 p-6">
+    <div className="page-enter mx-auto flex max-w-4xl flex-col gap-4 p-6">
       <PageHeader title={t('Settings')} description={t('Preferences are stored in this browser only.')} />
 
       <Section title={t('Appearance')}>
@@ -107,6 +108,23 @@ export function SettingsPage() {
               { value: 'dark', label: t('Dark') },
             ]}
           />
+        </div>
+      </Section>
+
+      <Section title={t('Sound and motion')} description={t('Sounds are generated in your browser; no audio files are downloaded.')}>
+        <Checkbox
+          checked={settings.sound}
+          onChange={(sound) => {
+            save({ sound }, sound ? t('Sound effects on') : t('Sound effects off'));
+          }}
+          label={t('Sound effects')}
+          description={t('Quiet clicks and chimes for actions, results and errors.')}
+        />
+        <Checkbox checked={settings.animations} onChange={(animations) => save({ animations })} label={t('Animations')} description={t('Entrances, moving backgrounds and counting numbers. Your system’s “reduce motion” setting is always respected.')} />
+        <div>
+          <Button icon={Volume2} disabled={!settings.sound} onClick={() => playSfx('complete')} data-testid="sound-test">
+            {t('Play a test sound')}
+          </Button>
         </div>
       </Section>
 

@@ -12,6 +12,11 @@ import {
   Eraser,
   Filter,
   History,
+  Upload,
+  BarChart3,
+  Regex,
+  Plus,
+  ArrowDownToLine,
   Link2,
   Pencil,
   Redo2,
@@ -32,13 +37,17 @@ import { computeView, countEmptyCells, findDuplicateRowIds } from '@/data-proces
 import { useActiveDataset, useData } from '@/app/stores/data';
 import { navigate, toast, useUi } from '@/app/stores/ui';
 import { copyToClipboard } from '@/app/services/exportData';
+import { ImportButton } from '@/app/components/ImportButton';
 import { DataGrid } from '@/app/components/DataGrid';
 import {
   CombineDialog,
   CONDITION_LABELS,
   ExportDialog,
+  AddColumnDialog,
   FilterDialog,
   FindReplaceDialog,
+  RegexDialog,
+  SummaryDialog,
   RenameDialog,
   SaveProjectDialog,
   SplitDialog,
@@ -55,6 +64,9 @@ type DialogState =
   | { kind: 'filter'; column: string | null }
   | { kind: 'rename-column'; column: Column }
   | { kind: 'rename-dataset' }
+  | { kind: 'regex'; column: string | null }
+  | { kind: 'add-column' }
+  | { kind: 'summary'; index: number }
   | { kind: 'close-dataset'; id: string; name: string }
   | { kind: 'restore' };
 
@@ -160,6 +172,7 @@ export function DataPage() {
                   {t('Go to Extract')}
                 </Button>
                 <Button onClick={() => navigate('/projects')}>{t('Open a project')}</Button>
+                <ImportButton />
               </>
             }
           />
@@ -195,6 +208,7 @@ export function DataPage() {
 
   const columnMenu = (column: Column, index: number): MenuItem[] => [
     { label: t('Rename…'), icon: Pencil, onSelect: () => setDialog({ kind: 'rename-column', column }) },
+    { label: t('Column summary…'), icon: BarChart3, onSelect: () => setDialog({ kind: 'summary', index }) },
     { label: t('Sort A → Z'), icon: ArrowDownAZ, onSelect: () => setView(id, { sort: { column: column.id, direction: 'asc' } }) },
     { label: t('Sort Z → A'), icon: ArrowUpAZ, onSelect: () => setView(id, { sort: { column: column.id, direction: 'desc' } }) },
     { label: t('Filter…'), icon: Filter, onSelect: () => setDialog({ kind: 'filter', column: column.id }) },
@@ -209,6 +223,8 @@ export function DataPage() {
     { label: t('Extract numbers into a new column'), onSelect: () => void run({ type: 'extractNumbers', column: column.id, mode: 'first', target: 'new' }) },
     { label: t('Parse dates (unambiguous only)'), onSelect: () => void run({ type: 'parseDates', column: column.id, target: 'replace' }) },
     { label: t('Normalize URLs'), icon: Link2, onSelect: () => void run({ type: 'normalizeUrls', column: column.id, baseUrl: dataset.source.url || undefined, stripTracking: true, stripHash: false }) },
+    { label: t('Extract by pattern…'), icon: Regex, onSelect: () => setDialog({ kind: 'regex', column: column.id }) },
+    { label: t('Fill empty cells from above'), icon: ArrowDownToLine, onSelect: () => void run({ type: 'fillDown', columns: [column.id] }) },
     { label: t('Find and replace…'), icon: Replace, onSelect: () => setDialog({ kind: 'find', column: column.id }) },
     { label: t('Split into columns…'), icon: Split, onSelect: () => setDialog({ kind: 'split', column: column.id }) },
     { label: t('Remove rows where this is empty'), onSelect: () => void run({ type: 'keepRows', column: column.id, condition: 'nonEmpty' }) },
@@ -229,6 +245,11 @@ export function DataPage() {
     { label: t('Find and replace…'), icon: Replace, onSelect: () => setDialog({ kind: 'find', column: null }) },
     { label: t('Split a column…'), icon: Split, onSelect: () => setDialog({ kind: 'split', column: null }) },
     { label: t('Combine columns…'), icon: Columns3, onSelect: () => setDialog({ kind: 'combine', columns: Array.from(selectedColumns) }) },
+    { label: t('Extract by pattern…'), icon: Regex, onSelect: () => setDialog({ kind: 'regex', column: null }) },
+    { label: t('Fill empty cells from above'), icon: ArrowDownToLine, onSelect: () => void run({ type: 'fillDown' }) },
+    { type: 'separator' },
+    { label: t('Add column…'), icon: Plus, onSelect: () => setDialog({ kind: 'add-column' }) },
+    { label: t('Add row'), icon: Plus, onSelect: () => void run({ type: 'addRow' }) },
     { type: 'separator' },
     { type: 'label', label: t('Change case (all columns)') },
     ...caseItems(undefined),
@@ -237,7 +258,7 @@ export function DataPage() {
     { label: t('Move header into first row'), onSelect: () => void run({ type: 'demoteHeader' }) },
   ];
 
-  const copy = async (format: 'tsv' | 'csv' | 'json') => {
+  const copy = async (format: 'tsv' | 'csv' | 'json' | 'markdown') => {
     const rows = selectedRows.size > 0 ? dataset.rows.filter((row) => selectedRows.has(row.id)) : viewIndexes.map((index) => dataset.rows[index]);
     try {
       const count = await copyToClipboard({ columns, rows }, format, { formulaGuard, includeHeader: true });
@@ -304,8 +325,10 @@ export function DataPage() {
               { label: t('Copy for spreadsheets (TSV)'), onSelect: () => void copy('tsv') },
               { label: t('Copy as CSV'), onSelect: () => void copy('csv') },
               { label: t('Copy as JSON'), onSelect: () => void copy('json') },
+              { label: t('Copy as Markdown table'), onSelect: () => void copy('markdown') },
             ]}
           />
+          <ImportButton compact />
           <Button icon={Save} onClick={() => setDialog({ kind: 'save' })} data-testid="save-project">
             {t('Save')}
           </Button>
@@ -471,6 +494,9 @@ export function DataPage() {
           if (dialog.kind === 'rename-column') void run({ type: 'renameColumn', column: dialog.column.id, name });
         }}
       />
+      <RegexDialog open={dialog.kind === 'regex'} onClose={() => setDialog({ kind: 'none' })} columns={columns} initialColumn={dialog.kind === 'regex' ? dialog.column : null} onApply={run} />
+      <AddColumnDialog open={dialog.kind === 'add-column'} onClose={() => setDialog({ kind: 'none' })} onApply={run} />
+      <SummaryDialog open={dialog.kind === 'summary'} onClose={() => setDialog({ kind: 'none' })} data={data} columnIndex={dialog.kind === 'summary' ? dialog.index : -1} />
       <RenameDialog open={dialog.kind === 'rename-dataset'} onClose={() => setDialog({ kind: 'none' })} title={t('Rename dataset')} label={t('Dataset name')} initial={dataset.name} onRename={(name) => store.getState().renameDataset(id, name)} />
       <ConfirmDialog
         open={dialog.kind === 'close-dataset'}

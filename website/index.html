@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{storeTitle}}</title>
+  <meta name="description" content="{{description}}">
+  <meta name="theme-color" content="#06120e">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="{{storeTitle}}">
+  <meta property="og:description" content="{{description}}">
+  <meta property="og:image" content="assets/screens/00-home.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/icons/icon-32.png">
+  <link rel="apple-touch-icon" href="assets/icons/icon-128.png">
+  <link rel="preload" href="assets/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="styles.css">
+  <noscript><style>.reveal{opacity:1;transform:none}.demo-table tbody tr{opacity:1;transform:none}</style></noscript>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <div class="bg" aria-hidden="true"><i></i><i></i><i></i><span class="grid"></span></div>
+  <div class="cursor-glow" aria-hidden="true"></div>
+
+  <header class="nav" id="top">
+    <a class="brand" href="#top" aria-label="{{name}} home">
+      <svg class="logo" viewBox="0 0 32 32" aria-hidden="true"><defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#10b981"/><stop offset=".6" stop-color="#0d9467"/><stop offset="1" stop-color="#0ea5e9"/></linearGradient></defs><rect width="32" height="32" rx="8" fill="url(#lg)"/><rect class="r" x="7" y="8.5" width="18" height="3.4" rx="1.7" fill="#fff"/><rect class="r" x="7" y="14.3" width="18" height="3.4" rx="1.7" fill="#fff" opacity=".82"/><rect class="r" x="7" y="20.1" width="11" height="3.4" rx="1.7" fill="#fff" opacity=".64"/></svg>
+      <span>{{name}}</span>
+    </a>
+    <nav aria-label="Sections">
+      <a href="#features">Features</a>
+      <a href="#how">How it works</a>
+      <a href="#privacy">Privacy</a>
+      <a href="#install">Install</a>
+      <a href="#faq">FAQ</a>
+    </nav>
+    <div class="nav-actions">
+      <button class="icon-btn" id="sound-toggle" type="button" aria-pressed="true" aria-label="Sound effects" title="Sound effects">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4z"/><path class="wave" d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/><path class="mute" d="m16 9 5 6m0-6-5 6"/></svg>
+      </button>
+      <a class="btn btn-primary btn-sm" href="{{zip}}" data-sfx="success" download>Download</a>
+    </div>
+  </header>
+
+  <main id="main">
+    <!-- Hero -->
+    <section class="hero">
+      <p class="pill reveal"><span class="dot"></span> Free forever · No account · 100% local</p>
+      <h1 class="reveal">Turn any webpage into <span class="grad">structured data.</span></h1>
+      <p class="lead reveal">{{name}} is a Chrome extension that extracts tables, product listings, links, images and metadata from the page you are on, lets you clean the rows, and exports them to CSV, Excel, JSON and more. Nothing ever leaves your browser.</p>
+      <div class="cta reveal">
+        <a class="btn btn-primary btn-lg magnetic" href="{{zip}}" data-sfx="success" download>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0-4.5-4.5M12 15l4.5-4.5M4 19h16"/></svg>
+          Download for Chrome
+          <small>v{{version}} · {{zipSize}}</small>
+        </a>
+        <a class="btn btn-ghost btn-lg" href="#how">See how it works <span class="arrow">→</span></a>
+      </div>
+      <p class="fine reveal">Works in Chrome 120+ and other Chromium browsers. Chrome Web Store listing coming soon.</p>
+
+      <div class="stage reveal" id="stage">
+        <div class="chip chip-a">CSV</div>
+        <div class="chip chip-b">XLSX</div>
+        <div class="chip chip-c">JSON</div>
+        <div class="chip chip-d">XPath</div>
+        <div class="window" id="tilt">
+          <div class="window-bar"><i></i><i></i><i></i><span>{{name}} workspace</span></div>
+          <img src="assets/screens/00-home.png" width="1280" height="800" alt="{{name}} workspace showing what a page contains: tables, lists, links and images, with one-click extraction." loading="eager">
+          <span class="shine"></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Numbers -->
+    <section class="numbers" aria-label="Facts">
+      <div class="num reveal"><b data-count="8">0</b><span>export formats</span></div>
+      <div class="num reveal"><b data-count="2">0</b><span>permissions, no site access by default</span></div>
+      <div class="num reveal"><b data-count="0">0</b><span>bytes uploaded, ever</span></div>
+      <div class="num reveal"><b data-count="{{tests}}" data-suffix="+">0</b><span>automated tests behind every release</span></div>
+    </section>
+
+    <!-- Live demo -->
+    <section class="demo" id="demo" aria-labelledby="demo-title">
+      <div class="section-head reveal">
+        <p class="eyebrow">Point. Click. Rows.</p>
+        <h2 id="demo-title">Click one item. {{name}} finds the rest.</h2>
+        <p>Pick a single product card or search result and the similar ones are detected, along with the fields inside them. No code, no setup.</p>
+      </div>
+      <div class="demo-grid reveal" id="demo-box" aria-hidden="true">
+        <div class="demo-page">
+          <div class="demo-url"><i></i> shop.example/coffee</div>
+          <div class="demo-cards">
+            <div class="demo-card" data-row="0"><span class="thumb t1"></span><b>Ethiopia Sidamo</b><em>$14.50</em><small>★ 4.8</small></div>
+            <div class="demo-card" data-row="1"><span class="thumb t2"></span><b>Colombia Huila</b><em>$13.00</em><small>★ 4.6</small></div>
+            <div class="demo-card" data-row="2"><span class="thumb t3"></span><b>Kenya AA</b><em>$16.25</em><small>★ 4.9</small></div>
+            <div class="demo-card" data-row="3"><span class="thumb t4"></span><b>সিলেট চা</b><em>$9.75</em><small>★ 4.7</small></div>
+          </div>
+          <span class="demo-cursor"></span>
+        </div>
+        <div class="demo-flow"><span></span><span></span><span></span></div>
+        <div class="demo-table">
+          <div class="demo-tools"><span>4 records</span><span class="fmt">CSV</span><span class="fmt">XLSX</span><span class="fmt">JSON</span></div>
+          <table>
+            <thead><tr><th>Title</th><th>Price</th><th>Rating</th></tr></thead>
+            <tbody>
+              <tr data-row="0"><td>Ethiopia Sidamo</td><td>$14.50</td><td>4.8</td></tr>
+              <tr data-row="1"><td>Colombia Huila</td><td>$13.00</td><td>4.6</td></tr>
+              <tr data-row="2"><td>Kenya AA</td><td>$16.25</td><td>4.9</td></tr>
+              <tr data-row="3"><td>সিলেট চা</td><td>$9.75</td><td>4.7</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features -->
+    <section class="features" id="features" aria-labelledby="features-title">
+      <div class="section-head reveal">
+        <p class="eyebrow">Everything you need</p>
+        <h2 id="features-title">A complete extraction toolkit, not a table copier.</h2>
+      </div>
+      <div class="bento">
+        <article class="card span-2 reveal">
+          <div class="ico"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M3 15h18M9 4v16"/></svg></div>
+          <h3>Tables, done properly</h3>
+          <p>Merged cells, multi-row headers, nested tables, hidden rows, ARIA grids and tables that load later. Anything unusual becomes a visible warning, never silent data loss.</p>
+        </article>
+        <article class="card reveal">
+          <div class="ico"><svg viewBox="0 0 24 24"><path d="m4 4 6.5 16 2.3-6.7L19.5 11z"/><path d="m14 14 5 5"/></svg></div>
+          <h3>Visual selector</h3>
+          <p>Point and click. Similar items and their fields are found for you: title, price, image, link, rating, date.</p>
+        </article>
+        <article class="card reveal">
+          <div class="ico"><svg viewBox="0 0 24 24"><path d="m8 7-5 5 5 5M16 7l5 5-5 5M13.5 5l-3 14"/></svg></div>
+          <h3>CSS &amp; XPath</h3>
+          <p>Write your own selectors with live match counts, samples and on-page highlighting.</p>
+        </article>
+        <article class="card reveal">
+          <div class="ico"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/><path d="m17 16 3 2-3 2"/></svg></div>
+          <h3>Pagination &amp; infinite scroll</h3>
+          <p>Follow next links, page numbers or endless feeds, always within limits you set and with a Stop button.</p>
+        </article>
+        <article class="card reveal">
+          <div class="ico"><svg viewBox="0 0 24 24"><path d="M5 5h14v4H5zM5 15h14v4H5z"/><path d="M12 9v6"/></svg></div>
+          <h3>Batch URLs</h3>
+          <p>Run one extraction over a list of pages, such as the detail pages behind a listing.</p>
+        </article>
+        <article class="card span-2 reveal">
+          <div class="ico"><svg viewBox="0 0 24 24"><path d="M4 5h16v14H4z"/><path d="M4 10h16M10 5v14"/><path d="m14 14 2 2 3-4"/></svg></div>
+          <h3>Clean before you export</h3>
+          <p>A fast spreadsheet-style preview: edit cells, sort, search, filter, remove duplicates, find &amp; replace, split and combine columns, extract numbers, parse dates. Full undo, and the original extraction is always kept.</p>
+        </article>
+        <article class="card reveal">
+          <div class="ico"><svg viewBox="0 0 24 24"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg></div>
+          <h3>Links, images, contacts</h3>
+          <p>Links with filters, images including lazy-loaded ones, emails, phone numbers and social profiles.</p>
+        </article>
+        <article class="card reveal">
+          <div class="ico"><svg viewBox="0 0 24 24"><path d="M8 4c-2 0-3 1-3 3v2c0 1.500-1 3-2 3 1 0 2 1.500 2 3v2c0 2 1 3 3 3M16 4c2 0 3 1 3 3v2c0 1.500 1 3 2 3-1 0-2 1.500-2 3v2c0 2-1 3-3 3"/></svg></div>
+          <h3>Metadata &amp; structured data</h3>
+          <p>Open Graph, Twitter Cards, JSON-LD and Schema.org microdata, flattened into columns.</p>
+        </article>
+        <article class="card reveal">
+          <div class="ico"><svg viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 13h7M9 17h5"/></svg></div>
+          <h3>Projects &amp; recipes</h3>
+          <p>Save results on your device and reuse extraction settings on similar pages.</p>
+        </article>
+      </div>
+      <div class="marquee reveal" aria-label="Export formats">
+        <div class="track">
+          <span>CSV</span><span>Excel XLSX</span><span>JSON</span><span>JSON Lines</span><span>TSV</span><span>Markdown</span><span>HTML</span><span>Clipboard</span>
+          <span>CSV</span><span>Excel XLSX</span><span>JSON</span><span>JSON Lines</span><span>TSV</span><span>Markdown</span><span>HTML</span><span>Clipboard</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- How it works -->
+    <section class="how" id="how" aria-labelledby="how-title">
+      <div class="section-head reveal">
+        <p class="eyebrow">How it works</p>
+        <h2 id="how-title">From page to file in three steps.</h2>
+      </div>
+      <div class="tabs reveal" role="tablist" aria-label="Steps">
+        <button role="tab" aria-selected="true" aria-controls="shot" id="tab-1" data-shot="assets/screens/02-visual-selector.png" data-alt="Selecting product cards on a page with the visual selector."><b>1</b><span><strong>Pick what you want</strong><small>Tables, items on the page, links or images.</small></span></button>
+        <button role="tab" aria-selected="false" aria-controls="shot" id="tab-2" data-shot="assets/screens/04-data-preview.png" data-alt="Reviewing extracted rows in the data preview."><b>2</b><span><strong>Review and clean</strong><small>Edit, filter and tidy the rows.</small></span></button>
+        <button role="tab" aria-selected="false" aria-controls="shot" id="tab-3" data-shot="assets/screens/05-export.png" data-alt="Export dialog with format and safety options."><b>3</b><span><strong>Export</strong><small>CSV, Excel, JSON and more.</small></span></button>
+      </div>
+      <div class="window shot reveal" id="shot" role="tabpanel" aria-labelledby="tab-1">
+        <div class="window-bar"><i></i><i></i><i></i><span>{{name}}</span></div>
+        <img src="assets/screens/02-visual-selector.png" width="1280" height="800" alt="Selecting product cards on a page with the visual selector." loading="lazy">
+      </div>
+    </section>
+
+    <!-- Privacy -->
+    <section class="privacy" id="privacy" aria-labelledby="privacy-title">
+      <div class="privacy-card reveal">
+        <div>
+          <p class="eyebrow">Private by design</p>
+          <h2 id="privacy-title">Your data stays on your device. Full stop.</h2>
+          <p>{{name}} has no server, no account and no analytics. It can only read a page after you click its icon there, and it makes no network requests of its own; the browser itself blocks them.</p>
+          <a class="btn btn-ghost" href="privacy">Read the privacy details <span class="arrow">→</span></a>
+        </div>
+        <ul class="checks">
+          <li>No sign-up, no subscription, no premium tier, no watermarks</li>
+          <li>Two permissions only: <code>activeTab</code> and <code>scripting</code></li>
+          <li>No access to any website until you invoke it</li>
+          <li>Nothing stored unless you press Save, and you can delete it</li>
+          <li>Does not bypass logins, paywalls or CAPTCHAs, and never crawls in the background</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Install -->
+    <section class="install" id="install" aria-labelledby="install-title">
+      <div class="section-head reveal">
+        <p class="eyebrow">Install in a minute</p>
+        <h2 id="install-title">Get {{name}} running.</h2>
+      </div>
+      <ol class="steps">
+        <li class="reveal"><b>1</b><div><strong>Download and unzip</strong><p><a href="{{zip}}" data-sfx="success" download>Download {{name}} v{{version}}</a> and unzip it to a folder you will keep.</p></div></li>
+        <li class="reveal"><b>2</b><div><strong>Open the extensions page</strong><p>Go to <code>chrome://extensions</code> and switch on <em>Developer mode</em>.</p></div></li>
+        <li class="reveal"><b>3</b><div><strong>Load it</strong><p>Click <em>Load unpacked</em> and choose the unzipped folder.</p></div></li>
+        <li class="reveal"><b>4</b><div><strong>Pin and click</strong><p>Pin {{name}} to the toolbar, open any webpage and click the icon.</p></div></li>
+      </ol>
+    </section>
+
+    <!-- FAQ -->
+    <section class="faq" id="faq" aria-labelledby="faq-title">
+      <div class="section-head reveal">
+        <p class="eyebrow">Questions</p>
+        <h2 id="faq-title">Good to know.</h2>
+      </div>
+      <div class="faq-list">
+        <details class="reveal"><summary>Is it really free?</summary><p>Yes. There are no usage limits, no locked features, no trial and no account. {{name}} is a product of {{company}}, built to be useful to everyone.</p></details>
+        <details class="reveal"><summary>Where does my data go?</summary><p>Nowhere. Extraction, cleaning and export all happen inside your browser. Data is saved on your device only when you choose to save a project, and you can delete it at any time.</p></details>
+        <details class="reveal"><summary>Does it work on every website?</summary><p>It works on pages you can open in your browser. Chrome does not allow any extension on its own pages (chrome://), the Chrome Web Store and a few protected pages. Content inside cross-origin frames is out of reach.</p></details>
+        <details class="reveal"><summary>Can it get around logins, paywalls or CAPTCHAs?</summary><p>No, and it will not. {{name}} reads what your browser already shows you. Please respect each website's terms of use and applicable laws.</p></details>
+        <details class="reveal"><summary>Does it handle non-English text?</summary><p>Yes. Everything is Unicode end to end, tested with বাংলা, emoji and more, including the CSV and Excel exports.</p></details>
+        <details class="reveal"><summary>Is it a crawler?</summary><p>No. Pagination, infinite scroll and batch runs are started by you, bounded by limits you set, and can be stopped at any moment.</p></details>
+      </div>
+    </section>
+
+    <!-- Final CTA -->
+    <section class="final reveal">
+      <h2>Stop copying and pasting. <span class="grad">Start extracting.</span></h2>
+      <a class="btn btn-primary btn-lg magnetic" href="{{zip}}" data-sfx="success" download>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0-4.5-4.5M12 15l4.5-4.5M4 19h16"/></svg>
+        Download {{name}} free
+      </a>
+      <p class="fine">{{motto}}</p>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <a class="brand" href="#top"><svg class="logo" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="url(#lg)"/><rect x="7" y="8.5" width="18" height="3.4" rx="1.7" fill="#fff"/><rect x="7" y="14.3" width="18" height="3.4" rx="1.7" fill="#fff" opacity=".82"/><rect x="7" y="20.1" width="11" height="3.4" rx="1.7" fill="#fff" opacity=".64"/></svg><span>{{name}}</span></a>
+    <p class="credits">{{copyright}}. A Product of <a href="{{companyUrl}}" target="_blank" rel="noopener">{{company}}</a>. Developed by <a href="{{developerUrl}}" target="_blank" rel="noopener">{{developer}}</a>.</p>
+    <nav aria-label="Footer"><a href="privacy">Privacy</a><a href="#features">Features</a><a href="#install">Install</a><a href="{{companyUrl}}" target="_blank" rel="noopener">uniquelabs.org</a></nav>
+  </footer>
+
+  <script src="app.js" defer></script>
+</body>
+</html>

@@ -29,7 +29,7 @@ type Variant = 'primary' | 'secondary' | 'ghost' | 'danger';
 type Size = 'sm' | 'md';
 
 const VARIANTS: Record<Variant, string> = {
-  primary: 'bg-brand-600 text-white hover:bg-brand-700 disabled:hover:bg-brand-600 border border-transparent',
+  primary: 'btn-primary text-white border border-transparent',
   secondary:
     'border border-zinc-300 bg-white text-zinc-800 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800',
   ghost: 'border border-transparent text-zinc-700 hover:bg-zinc-100 dark:text-zinc-200 dark:hover:bg-zinc-800',
@@ -54,7 +54,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
       type={type ?? 'button'}
       disabled={disabled || loading}
       className={cx(
-        'inline-flex shrink-0 items-center justify-center rounded-md font-medium whitespace-nowrap transition-colors select-none disabled:cursor-not-allowed disabled:opacity-50',
+        'btn-press inline-flex shrink-0 items-center justify-center rounded-lg font-medium whitespace-nowrap select-none disabled:cursor-not-allowed disabled:opacity-50',
         VARIANTS[variant],
         SIZES[size],
         className,
@@ -85,7 +85,7 @@ export const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(functio
       aria-label={label}
       title={label}
       className={cx(
-        'inline-flex shrink-0 items-center justify-center rounded-md text-zinc-600 transition-colors hover:bg-zinc-100 hover:text-zinc-900 disabled:cursor-not-allowed disabled:opacity-40 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-white',
+        'btn-press inline-flex shrink-0 items-center justify-center rounded-lg text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 disabled:cursor-not-allowed disabled:opacity-40 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-white',
         size === 'sm' ? 'size-6' : 'size-8',
         active && 'bg-zinc-100 text-zinc-900 dark:bg-zinc-800 dark:text-white',
         className,
@@ -100,7 +100,7 @@ export const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(functio
 // ---- Form controls -----------------------------------------------------------------------
 
 const CONTROL_BASE =
-  'h-8 min-w-0 rounded-md border border-zinc-300 bg-white px-2.5 text-[13px] text-zinc-900 placeholder:text-zinc-400 disabled:cursor-not-allowed disabled:opacity-60 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:placeholder:text-zinc-500';
+  'h-8 min-w-0 rounded-lg border border-zinc-300 bg-white px-2.5 text-[13px] text-zinc-900 shadow-xs transition-[border-color,box-shadow] duration-200 placeholder:text-zinc-400 hover:border-zinc-400 focus:border-brand-500 focus:ring-3 focus:ring-brand-500/15 focus:outline-none dark:hover:border-zinc-600 disabled:cursor-not-allowed disabled:opacity-60 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:placeholder:text-zinc-500';
 
 /** Controls fill their container unless the caller gives them a width of their own. */
 function control(className: string | undefined): string {
@@ -223,7 +223,7 @@ export function Checkbox({
 
 export function Card({ className, children, ...rest }: { className?: string; children: ReactNode } & React.HTMLAttributes<HTMLDivElement>) {
   return (
-    <div className={cx('rounded-lg border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900', className)} {...rest}>
+    <div className={cx('rounded-xl border border-zinc-200/80 bg-white shadow-[0_1px_2px_rgb(0_0_0/0.04),0_8px_24px_-16px_rgb(0_0_0/0.12)] dark:border-zinc-800 dark:bg-zinc-900 dark:shadow-none', className)} {...rest}>
       {children}
     </div>
   );
@@ -233,7 +233,10 @@ export function PageHeader({ title, description, actions }: { title: string; des
   return (
     <header className="flex flex-wrap items-start justify-between gap-3">
       <div className="min-w-0">
-        <h1 className="text-lg font-semibold tracking-tight text-zinc-900 dark:text-white">{title}</h1>
+        <h1 className="flex items-center gap-2.5 text-xl font-semibold tracking-tight text-zinc-900 dark:text-white">
+          <span className="brand-gradient bar-grow h-5 w-1 rounded-full" aria-hidden />
+          {title}
+        </h1>
         {description ? <p className="mt-0.5 max-w-3xl text-[13px] text-zinc-600 dark:text-zinc-400">{description}</p> : null}
       </div>
       {actions ? <div className="flex flex-wrap items-center gap-2">{actions}</div> : null}
@@ -274,7 +277,7 @@ export function EmptyState({
 }) {
   return (
     <div className={cx('flex flex-col items-center justify-center px-6 py-10 text-center', className)}>
-      <div className="mb-3 flex size-10 items-center justify-center rounded-full bg-zinc-100 text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400">
+      <div className="float mb-3 flex size-12 items-center justify-center rounded-2xl bg-gradient-to-br from-brand-50 to-sky-50 text-brand-600 ring-1 ring-brand-200/60 dark:from-brand-950 dark:to-sky-950 dark:text-brand-300 dark:ring-brand-800/60">
         <Icon className="size-5" aria-hidden />
       </div>
       <h2 className="text-sm font-semibold text-zinc-900 dark:text-white">{title}</h2>
@@ -312,12 +315,12 @@ export function ProgressBar({ value, label }: { value?: number; label: string })
       aria-valuemin={0}
       aria-valuemax={100}
       aria-valuenow={pct}
-      className="h-1.5 w-full overflow-hidden rounded-full bg-zinc-200 dark:bg-zinc-800"
+      className="h-2 w-full overflow-hidden rounded-full bg-zinc-200 dark:bg-zinc-800"
     >
       {pct === undefined ? (
-        <div className="h-full w-1/3 animate-pulse rounded-full bg-brand-500" />
+        <div className="shimmer h-full w-full rounded-full" />
       ) : (
-        <div className="h-full rounded-full bg-brand-600 transition-[width]" style={{ width: `${pct}%` }} />
+        <div className="progress-live h-full rounded-full transition-[width] duration-500" style={{ width: `${Math.max(pct, 2)}%` }} />
       )}
     </div>
   );
@@ -362,7 +365,7 @@ export function Dialog({
       onMouseDown={(event) => {
         if (event.target === ref.current) onClose(); // click on the backdrop
       }}
-      className={cx('w-[calc(100vw-2rem)] rounded-xl border border-zinc-200 bg-white p-0 text-zinc-900 shadow-2xl dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-100', width)}
+      className={cx('w-[calc(100vw-2rem)] rounded-2xl border border-zinc-200 bg-white p-0 text-zinc-900 shadow-[0_30px_80px_-20px_rgb(0_0_0/0.45)] dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-100', width)}
     >
       <div className="flex max-h-[85vh] flex-col">
         <div className="flex items-start justify-between gap-4 border-b border-zinc-200 px-5 py-3.5 dark:border-zinc-800">
@@ -549,7 +552,7 @@ export function Menu({
               aria-label={label}
               onKeyDown={onKeyDown}
               style={{ position: 'fixed', top: position?.top ?? -9999, left: position?.left ?? -9999, visibility: position ? 'visible' : 'hidden' }}
-              className="z-50 max-h-[70vh] min-w-44 overflow-auto rounded-lg border border-zinc-200 bg-white p-1 text-[13px] shadow-lg dark:border-zinc-700 dark:bg-zinc-900"
+              className="pop-in z-50 max-h-[70vh] min-w-44 overflow-auto rounded-xl border border-zinc-200 bg-white p-1 text-[13px] shadow-[0_18px_50px_-12px_rgb(0_0_0/0.3)] dark:border-zinc-700 dark:bg-zinc-900"
             >
               {items.map((item, index) => {
                 if (item.type === 'separator') return <div key={index} role="separator" className="my-1 h-px bg-zinc-200 dark:bg-zinc-800" />;
@@ -648,7 +651,7 @@ export function Segmented<T extends string>({
   label: string;
 }) {
   return (
-    <div role="radiogroup" aria-label={label} className="inline-flex rounded-md border border-zinc-300 bg-zinc-100 p-0.5 dark:border-zinc-700 dark:bg-zinc-800">
+    <div role="radiogroup" aria-label={label} className="inline-flex rounded-lg border border-zinc-300 bg-zinc-100 p-0.5 dark:border-zinc-700 dark:bg-zinc-800">
       {options.map((option) => (
         <button
           key={option.value}
@@ -657,7 +660,7 @@ export function Segmented<T extends string>({
           aria-checked={option.value === value}
           onClick={() => onChange(option.value)}
           className={cx(
-            'h-6.5 rounded px-2.5 text-xs font-medium transition-colors',
+            'btn-press h-6.5 rounded-md px-2.5 text-xs font-medium',
             option.value === value ? 'bg-white text-zinc-900 shadow-sm dark:bg-zinc-950 dark:text-white' : 'text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white',
           )}
         >

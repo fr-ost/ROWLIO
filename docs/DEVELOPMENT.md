@@ -40,7 +40,9 @@ Load `dist/` at `chrome://extensions` (Developer mode → Load unpacked).
 | `npm run package` | Builds and writes `release/rowlio-<version>.zip` for the Chrome Web Store. Refuses to package a test build. |
 | `npm run icons` | Regenerates `public/icons/*.png` from the SVG in `scripts/generate-icons.mjs` (uses Playwright's Chromium). |
 | `npm run licenses` | Regenerates `public/THIRD_PARTY_NOTICES.txt`; fails on a missing or non-permissive licence. |
-| `npm run screenshots` | Regenerates `docs/screenshots/*.png` (1280×800) from the fixture site. |
+| `npm run screenshots` | Regenerates `docs/screenshots/*.png` (1280×800) from the fixture site. The website uses the same images. |
+| `npm run website` | Builds the marketing site from `website/` into `website-dist/` (Node built-ins only). |
+| `npm run website:preview` | Builds the site and serves it on `http://127.0.0.1:4321`. |
 
 ## How the build works
 
@@ -58,6 +60,36 @@ Load `dist/` at `chrome://extensions` (Developer mode → Load unpacked).
 
 Build-time constants: `__APP_VERSION__` and `__E2E__` (read through
 `src/config/brand.ts` as `APP_VERSION` and `IS_E2E`).
+
+## The website and Vercel
+
+`website/` is hand-written HTML, CSS and JavaScript with no dependencies and no
+third-party requests. `scripts/website.mjs`:
+
+1. copies `website/` to `website-dist/`, replacing `{{tokens}}` in `.html` files with
+   values from `brand.config.json` and `package.json` (an unknown token fails the build);
+2. copies `docs/screenshots/` to `assets/screens/` and `public/icons/` to `assets/icons/`;
+3. if `release/rowlio-<version>.zip` exists, copies it over `website/downloads/` so the
+   site always offers the latest package.
+
+`vercel.json` makes a root deployment work without dashboard settings: no install step,
+build command `node scripts/website.mjs`, output directory `website-dist`, clean URLs and
+a few security headers. Because Vercel does not run `npm run package`, the archive in
+`website/downloads/` is **committed**; refresh it with `npm run package && npm run
+website` when releasing.
+
+## Look and feel
+
+- Design tokens, gradients and every animation live in `src/styles/app.css`. Animations
+  are plain CSS classes (`page-enter`, `stagger`, `pop-in`, `card-lift`, `aurora` …).
+- `html[data-motion="off"]` (the Animations setting) and `prefers-reduced-motion` switch
+  all of them off in one place; `src/app/components/fx.tsx` components check the same
+  flag.
+- Sounds are defined as short note lists in `src/app/services/sfx.ts` and synthesised
+  with the Web Audio API. Add a sound by adding an entry; play it with `playSfx(name)`.
+  Do not add audio files.
+- The typeface comes from `@fontsource-variable/inter` and is bundled by Vite. If you
+  change it, update `SHIPPED_BUILD_TOOLS` in `scripts/licenses.mjs`.
 
 ## Changing things
 
@@ -143,7 +175,8 @@ at startup, and generate `_locales/<lang>/messages.json` in `scripts/build.mjs`.
 3. `npm run verify`
 4. `npm audit`
 5. Work through the manual checklist in [TESTING.md](TESTING.md).
-6. `npm run package`
+6. `npm run package`, then `npm run website`, and commit the refreshed
+   `website/downloads/rowlio-<version>.zip`.
 7. Upload `release/rowlio-<version>.zip` in the Chrome Web Store developer dashboard and
    complete the listing from
    [CHROME_WEB_STORE_LISTING.md](CHROME_WEB_STORE_LISTING.md).
@@ -154,5 +187,7 @@ at startup, and generate `_locales/<lang>/messages.json` in `scripts/build.mjs`.
 - **Licence** for Rowlio's own code (none chosen; see the README).
 - **Brand clearance**: domain, Chrome Web Store name and trademark availability of
   "Rowlio" have not been verified.
-- **Contact details**: `brand.config.json` → `urls` (homepage, support, privacy policy,
-  source code) are empty.
+- **Contact details**: `brand.config.json` → `urls.homepage` is set to the Unique Labs
+  website; support, privacy policy and source code URLs are still empty.
+- **Website domain**: where the site will be served from, and whether the archive should
+  keep being offered there once the extension is in the Chrome Web Store.

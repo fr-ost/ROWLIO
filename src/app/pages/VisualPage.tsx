@@ -60,7 +60,7 @@ export function VisualPage() {
 
   return (
     <ConnectionGate>
-      <div className="mx-auto flex max-w-6xl flex-col gap-4 p-6">
+      <div className="page-enter mx-auto flex max-w-6xl flex-col gap-4 p-6">
         <PageHeader
           title={t('Visual Selector')}
           description={t('Click one item on the page (a product card, a search result, a directory entry) and {name} finds the others like it and the fields inside them.', { name: brand.name })}

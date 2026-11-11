@@ -52,7 +52,10 @@ the user invoked Rowlio there (`activeTab`). See [PERMISSIONS.md](PERMISSIONS.md
 
 ```
 brand.config.json        Single source of product identity
-scripts/                 build.mjs, licenses.mjs, package.mjs, generate-icons.mjs
+scripts/                 build.mjs, licenses.mjs, package.mjs, generate-icons.mjs,
+                         website.mjs
+website/                 Static marketing site (built into website-dist/ for Vercel)
+vercel.json              Root deployment: build the site, serve website-dist/
 src/
   config/brand.ts        Typed access to brand.config.json, version, E2E flag
   types/                 Shared contracts (data, extraction, recipes, settings,
@@ -67,7 +70,7 @@ src/
     patterns.ts          repeated-element detection, record groups
     fields.ts            field detection inside records
     valueTypes.ts        value classification (price, date, rating …)
-    links.ts images.ts lists.ts metadata.ts structured.ts
+    links.ts images.ts lists.ts metadata.ts structured.ts contacts.ts
     engine.ts            runSpec(), scanPage(), contentSignature()
   pagination/
     nextControl.ts       find / activate the next-page control   (page side)
@@ -75,16 +78,20 @@ src/
     scroll.ts            bounded scroll loop over a ScrollEnv
     accumulator.ts       merging pages / scroll steps, duplicate handling
     runner.ts            pagination loop over a PageTransport     (workspace side)
+    batch.ts             URL-list loop over a BatchTransport      (workspace side)
   content/               message router, job streaming, overlay, picker, styles
   messaging/             protocol.ts (the contract), tabClient.ts (inject, request, jobs)
   background/            service worker
-  data-processing/       dataset building, type inference, transforms, view (filter/sort)
-  export/                csv, json, xlsx (own writer), formula guard, filenames
+  data-processing/       dataset building, type inference, transforms, view (filter/sort),
+                         column summary, file import
+  export/                csv, json, xlsx (own writer), markup (Markdown / HTML),
+                         formula guard, filenames
   storage/               IndexedDB: db, projects, recipes, settings
   workers/               data worker + main-thread client
-  app/                   workspace: stores, services, components, pages
+  app/                   workspace: stores, services (incl. batch, sfx), components
+                         (incl. fx: counters, aurora, spotlight, credits), pages
   popup/                 popup UI
-  styles/app.css         Tailwind entry and theme tokens
+  styles/app.css         Tailwind entry, theme tokens, typeface, all animations
 tests/
   unit/                  Vitest + jsdom
   e2e/                   Playwright against the built extension, fixture site
@@ -203,7 +210,7 @@ that drop old rows are still collected.
 | Future feature | Where it plugs in |
 |---|---|
 | Scheduled, user-controlled extraction | `chrome.alarms` + a recipe run: `runRecipe()` already separates "what" (spec) from "when". Needs the `alarms` permission and persistent site access. |
-| Multiple tabs / batch URLs | `PageTransport` is the only thing `runPagination` knows about a tab; a batch runner is another loop over transports. |
+| Multiple tabs | `runBatch` (`src/pagination/batch.ts`) only knows a `BatchTransport` (`open`, `extract`, `sleep`); a transport that opens each address in its own tab would plug in there. It needs standing access to the sites involved. |
 | Visual template builder | Rules are plain data (`ExtractionRule`); a builder is another editor for the same structure. |
 | Transformation workflows | `TransformOp` is serialisable; store and replay arrays of ops. |
 | More export formats | Add a writer in `src/export/`, a case in `buildExport`, a label in `FORMAT_LABELS`. |
@@ -224,3 +231,14 @@ that drop old rows are still collected.
 - **No automatic persistence of extracted data.** Page content is written to disk only
   when the user saves a project.
 - **Settings in IndexedDB**, not `chrome.storage`, which avoids the `storage` permission.
+- **Batch URLs reuses the connected tab** instead of opening tabs or fetching pages. It
+  therefore needs no new permission, shows the user every page it visits, and extracts
+  from the rendered page with the same engine as everything else. The cost: it stays on
+  the site the user invoked Rowlio on unless access to another site was granted.
+- **Synthesised sound, CSS-only motion.** No audio assets and no animation library: a
+  short note table played through the Web Audio API, and keyframes in one stylesheet with
+  a single off switch. This keeps the bundle small and the "no remote assets" rule easy
+  to audit.
+- **The website is not a second app.** It is static files plus a 100-line build script
+  that needs no `npm install`, so a root deployment on Vercel cannot break on the
+  extension's toolchain.

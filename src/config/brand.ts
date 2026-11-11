@@ -15,6 +15,10 @@ export interface BrandConfig {
   promises: string[];
   colors: { brand: string; brandDark: string; ink: string };
   urls: { homepage: string; support: string; privacyPolicy: string; sourceCode: string };
+  /** Copyright line, e.g. "© 2026 Unique Labs". */
+  copyright: string;
+  productOf: string;
+  developer: { name: string; url: string };
   filePrefix: string;
   projectFileExtension: string;
   recipeFileExtension: string;

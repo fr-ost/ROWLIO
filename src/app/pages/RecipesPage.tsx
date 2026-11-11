@@ -94,7 +94,7 @@ export function RecipesPage() {
   ];
 
   return (
-    <div className="mx-auto flex max-w-6xl flex-col gap-4 p-6">
+    <div className="page-enter mx-auto flex max-w-6xl flex-col gap-4 p-6">
       <PageHeader
         title={t('Saved Recipes')}
         description={t('A recipe remembers how to extract (method, selectors, fields, pagination limits) so you can repeat it on similar pages. Recipes contain no page content.')}

@@ -24,7 +24,7 @@ Turn any webpage into structured data. Extract tables, lists, links and images t
 **Description**
 
 ```
-Rowlio turns any webpage into structured data — tables, product listings, search results, links, images and metadata — ready to review, clean and export. Free forever, with no account and no limits. Everything happens on your device.
+Rowlio turns any webpage into structured data — tables, product listings, search results, links, images, contact details and metadata — ready to review, clean and export. Free forever, with no account and no limits. Everything happens on your device.
 
 HOW IT WORKS
 1. Open a webpage and click the Rowlio icon.
@@ -37,13 +37,14 @@ WHAT YOU CAN EXTRACT
 • Custom rules — write CSS selectors or XPath, preview the matches, and build multi-field rules.
 • Links and images — with filters for internal / external links, containers, text and size.
 • Lists, headings, breadcrumbs, page metadata, Open Graph, Twitter Cards, JSON-LD and Schema.org microdata.
-• Multiple pages — follow "next" links, page numbers or infinite scroll, always within limits you set and with a Stop button.
+• Contacts — email addresses, phone numbers and social profile links shown on the page.
+• Multiple pages — follow "next" links, page numbers or infinite scroll, or run the same extraction over a list of page addresses you provide. Always within limits you set and with a Stop button.
 
 CLEAN YOUR DATA BEFORE EXPORTING
-A spreadsheet-style preview lets you edit cells, sort, search, filter, rename and reorder columns, remove duplicates and empty rows, find and replace, split and combine columns, extract numbers and parse dates. Every change can be undone, and the original extraction is always kept.
+A spreadsheet-style preview lets you edit cells, sort, search, filter, rename and reorder columns, remove duplicates and empty rows, find and replace, extract by pattern, fill down, split and combine columns, extract numbers and parse dates, and see a summary of any column. Every change can be undone, and the original extraction is always kept. You can also import a CSV, TSV or JSON file and clean it with the same tools.
 
 EXPORT ANYWHERE
-CSV, Excel (XLSX), JSON, JSON Lines, TSV, or copy straight to the clipboard. Full Unicode support (বাংলা, العربية, 日本語 …). Exports are protected against spreadsheet formula injection.
+CSV, Excel (XLSX), JSON, JSON Lines, TSV, Markdown, HTML, or copy straight to the clipboard. Full Unicode support (বাংলা, العربية, 日本語 …). Exports are protected against spreadsheet formula injection.
 
 SAVE AND REUSE
 Save results as projects on your device. Save your extraction settings as recipes and reuse them on similar pages.
@@ -60,7 +61,7 @@ Rowlio reads pages you can already open in your browser. It does not bypass logi
 
 Chrome does not allow extensions to run on browser pages (chrome://), the Chrome Web Store, and a few other protected pages.
 
-Rowlio is made by Unique Labs. Useful technology. Accessible to everyone.
+A Product of Unique Labs (www.uniquelabs.org). Developed by Shahriar Ahmed. Useful technology. Accessible to everyone.
 ```
 
 ## Graphic assets
@@ -68,7 +69,7 @@ Rowlio is made by Unique Labs. Useful technology. Accessible to everyone.
 | Asset | Requirement | Status |
 |---|---|---|
 | Store icon | 128×128 PNG | Ready: `public/icons/icon-128.png` |
-| Screenshots | 1280×800 or 640×400, 1–5 images | Drafts in `docs/screenshots/` (01–06, taken on the test site). **Retake on real, non-copyrighted or own content before submitting**, and choose the five strongest. |
+| Screenshots | 1280×800 or 640×400, 1–5 images | Drafts in `docs/screenshots/` (00–06, taken on the test site). **Retake on real, non-copyrighted or own content before submitting**, and choose the five strongest. |
 | Small promo tile | 440×280 PNG | **To do** |
 | Marquee promo tile | 1400×560 PNG (optional) | To do if wanted |
 
@@ -84,7 +85,7 @@ Suggested screenshot captions:
 
 | Field | Value |
 |---|---|
-| Official URL / homepage | **To be provided** (`brand.config.json` → `urls.homepage`) |
+| Official URL / homepage | `https://www.uniquelabs.org` (`brand.config.json` → `urls.homepage`). To use the "official URL" field the domain must be verified in Google Search Console by the publisher account. The product website in `website/` can be listed as the homepage instead once it is deployed. |
 | Support URL | **To be provided** |
 | Privacy policy URL | **Required.** Publish a reviewed version of `docs/PRIVACY.md` and enter its URL |
 | Mature content | No |
@@ -127,7 +128,8 @@ Certify all three statements:
 - [ ] Chrome Web Store searched for conflicting names. *Not yet done.*
 - [ ] Licence chosen for the source code (if the repository will be public).
 - [ ] Privacy policy reviewed and published at a public URL.
-- [ ] Homepage and support contact published; URLs added to `brand.config.json`.
+- [ ] Product website deployed (see the README, "Website") and its URL decided.
+- [ ] Support contact published; remaining URLs added to `brand.config.json`.
 - [ ] Security contact added to `docs/SECURITY.md`.
 
 **Build**

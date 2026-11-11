@@ -165,7 +165,7 @@ export function SelectorsPage() {
   const hasRule = rule.rowSelector.trim() !== '' || rule.fields.length > 0;
   return (
     <ConnectionGate>
-      <div className="mx-auto flex max-w-6xl flex-col gap-4 p-6">
+      <div className="page-enter mx-auto flex max-w-6xl flex-col gap-4 p-6">
         <PageHeader
           title={t('Advanced Selectors')}
           description={t('Extract with CSS selectors or XPath: text, HTML, attributes, links and image sources. Test a selector first, then build a rule with several fields.')}

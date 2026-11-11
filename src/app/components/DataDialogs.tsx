@@ -6,6 +6,7 @@ import type { Column, ColumnFilter, ExportFormat, ExportOptions, FilterCondition
 import { formatNumber, t } from '@/i18n';
 import { listProjects, saveProject } from '@/storage/projects';
 import { XlsxLimitError } from '@/export';
+import { summarizeColumn } from '@/data-processing/summary';
 import type { OpenDataset, ProjectRef } from '@/app/stores/data';
 import { toast, useUi } from '@/app/stores/ui';
 import { exportSheets, FORMAT_LABELS, formatBytes, type Sheet } from '@/app/services/exportData';
@@ -144,7 +145,7 @@ export function ExportDialog({
         ) : null}
 
         <div className="flex flex-col gap-2 rounded-md border border-zinc-200 p-3 dark:border-zinc-800">
-          {format !== 'json' && format !== 'jsonl' ? <Checkbox checked={includeHeader} onChange={setIncludeHeader} label={t('Include the header row')} /> : null}
+          {format !== 'json' && format !== 'jsonl' && format !== 'markdown' ? <Checkbox checked={includeHeader} onChange={setIncludeHeader} label={t('Include the header row')} /> : null}
           {format === 'csv' ? (
             <div className="flex items-center gap-2 text-[13px]">
               <span>{t('Delimiter')}</span>
@@ -168,6 +169,18 @@ export function ExportDialog({
                 label={t('Protect against formula injection (recommended)')}
                 description={t("Cells starting with =, +, - or @ get a leading apostrophe so spreadsheet apps treat them as text, not formulas. Plain numbers such as -12.5 are left alone.")}
               />
+            </>
+          ) : null}
+          {format === 'markdown' ? <p className="text-xs text-zinc-500">{t('A GitHub-style Markdown table. Line breaks inside cells become <br>.')}</p> : null}
+          {format === 'html' ? (
+            <>
+              <Checkbox
+                checked={options.formulaGuard}
+                onChange={(formulaGuard) => setOptions({ ...options, formulaGuard })}
+                label={t('Protect against formula injection (recommended)')}
+                description={t('Spreadsheet apps can open HTML tables and run cells that look like formulas. Cells starting with =, +, - or @ get a leading apostrophe.')}
+              />
+              <p className="text-xs text-zinc-500">{t('A self-contained web page with one table. Cell text is escaped; the file contains no scripts.')}</p>
             </>
           ) : null}
           {format === 'json' ? <Checkbox checked={options.jsonPretty} onChange={(jsonPretty) => setOptions({ ...options, jsonPretty })} label={t('Pretty-print (indented)')} /> : null}
@@ -708,6 +721,210 @@ export function RenameDialog({
       >
         <Field label={label}>{(id) => <Input id={id} value={value} autoFocus onChange={(event) => setValue(event.target.value)} onFocus={(event) => event.target.select()} data-testid="rename-input" />}</Field>
       </form>
+    </Dialog>
+  );
+}
+
+// ---- Extract by pattern --------------------------------------------------------------------------
+
+export function RegexDialog({
+  open,
+  onClose,
+  columns,
+  initialColumn,
+  onApply,
+}: {
+  open: boolean;
+  onClose: () => void;
+  columns: Column[];
+  initialColumn: string | null;
+  onApply: (op: TransformOp) => Promise<boolean>;
+}) {
+  const [column, setColumn] = useState('');
+  const [pattern, setPattern] = useState('');
+  const [caseSensitive, setCaseSensitive] = useState(false);
+  const [target, setTarget] = useState<'new' | 'replace'>('new');
+  const [error, setError] = useState('');
+  useEffect(() => {
+    if (open) {
+      setColumn(initialColumn ?? columns[0]?.id ?? '');
+      setError('');
+    }
+  }, [open, initialColumn, columns]);
+
+  const apply = async () => {
+    if (!pattern) {
+      setError(t('Enter a pattern to look for.'));
+      return;
+    }
+    try {
+      new RegExp(pattern);
+    } catch (caught) {
+      setError(t('Invalid regular expression: {detail}', { detail: caught instanceof Error ? caught.message : '' }));
+      return;
+    }
+    setError('');
+    if (await onApply({ type: 'extractRegex', column, pattern, caseSensitive, target })) onClose();
+  };
+
+  return (
+    <Dialog
+      open={open}
+      onClose={onClose}
+      title={t('Extract by pattern')}
+      description={t('Pull the part of each cell that matches a regular expression, for example an order number or a postcode.')}
+      footer={
+        <>
+          <Button onClick={onClose}>{t('Cancel')}</Button>
+          <Button variant="primary" onClick={() => void apply()} data-testid="regex-apply">
+            {t('Extract')}
+          </Button>
+        </>
+      }
+    >
+      <div className="flex flex-col gap-3">
+        <Field label={t('Column')}>
+          {(id) => (
+            <Select id={id} value={column} onChange={(event) => setColumn(event.target.value)}>
+              {columns.map((item) => (
+                <option key={item.id} value={item.id}>
+                  {item.name}
+                </option>
+              ))}
+            </Select>
+          )}
+        </Field>
+        <Field label={t('Pattern')} hint={t('If the pattern has a group in parentheses, the group is extracted; otherwise the whole match. Example: (\\d+) reviews')} error={error}>
+          {(id) => <Input id={id} mono value={pattern} autoFocus spellCheck={false} onChange={(event) => setPattern(event.target.value)} data-testid="regex-pattern" />}
+        </Field>
+        <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
+          <Segmented
+            label={t('Where to put the result')}
+            value={target}
+            onChange={setTarget}
+            options={[
+              { value: 'new', label: t('New column') },
+              { value: 'replace', label: t('Replace the cell') },
+            ]}
+          />
+          <Checkbox checked={caseSensitive} onChange={setCaseSensitive} label={t('Match case')} />
+        </div>
+      </div>
+    </Dialog>
+  );
+}
+
+// ---- Add column ----------------------------------------------------------------------------------
+
+export function AddColumnDialog({ open, onClose, onApply }: { open: boolean; onClose: () => void; onApply: (op: TransformOp) => Promise<boolean> }) {
+  const [name, setName] = useState('');
+  const [fill, setFill] = useState<'empty' | 'rowNumber' | 'value'>('empty');
+  const [value, setValue] = useState('');
+  const [error, setError] = useState('');
+  useEffect(() => {
+    if (open) {
+      setName('');
+      setValue('');
+      setFill('empty');
+      setError('');
+    }
+  }, [open]);
+
+  const apply = async () => {
+    if (!name.trim()) {
+      setError(t('Give the new column a name.'));
+      return;
+    }
+    if (await onApply({ type: 'addColumn', name: name.trim(), fill, value })) onClose();
+  };
+
+  return (
+    <Dialog
+      open={open}
+      onClose={onClose}
+      title={t('Add column')}
+      width="max-w-md"
+      footer={
+        <>
+          <Button onClick={onClose}>{t('Cancel')}</Button>
+          <Button variant="primary" onClick={() => void apply()} data-testid="add-column-apply">
+            {t('Add column')}
+          </Button>
+        </>
+      }
+    >
+      <div className="flex flex-col gap-3">
+        <Field label={t('Column name')} error={error}>
+          {(id) => <Input id={id} value={name} autoFocus onChange={(event) => setName(event.target.value)} data-testid="add-column-name" />}
+        </Field>
+        <Field label={t('Fill with')}>
+          {(id) => (
+            <Select id={id} value={fill} onChange={(event) => setFill(event.target.value as typeof fill)} data-testid="add-column-fill">
+              <option value="empty">{t('Nothing (empty cells)')}</option>
+              <option value="rowNumber">{t('Row numbers (1, 2, 3 …)')}</option>
+              <option value="value">{t('The same value in every row')}</option>
+            </Select>
+          )}
+        </Field>
+        {fill === 'value' ? <Field label={t('Value')}>{(id) => <Input id={id} value={value} onChange={(event) => setValue(event.target.value)} data-testid="add-column-value" />}</Field> : null}
+      </div>
+    </Dialog>
+  );
+}
+
+// ---- Column summary ------------------------------------------------------------------------------
+
+function formatStat(value: number): string {
+  return new Intl.NumberFormat('en-US', { maximumFractionDigits: 4 }).format(value);
+}
+
+export function SummaryDialog({ open, onClose, data, columnIndex }: { open: boolean; onClose: () => void; data: TableData; columnIndex: number }) {
+  const summary = useMemo(() => (open && columnIndex >= 0 && columnIndex < data.columns.length ? summarizeColumn(data, columnIndex) : null), [open, data, columnIndex]);
+  if (!summary) return null;
+  const stats: [string, string][] = [
+    [t('Rows'), formatNumber(summary.total)],
+    [t('Filled'), formatNumber(summary.filled)],
+    [t('Empty'), formatNumber(summary.empty)],
+    [t('Distinct values'), formatNumber(summary.distinct)],
+    [t('Shortest / longest'), t('{min} / {max} characters', { min: summary.shortest, max: summary.longest })],
+  ];
+  if (summary.numeric) {
+    stats.push(
+      [t('Numeric cells'), formatNumber(summary.numeric.count)],
+      [t('Sum'), formatStat(summary.numeric.sum)],
+      [t('Average'), formatStat(summary.numeric.mean)],
+      [t('Median'), formatStat(summary.numeric.median)],
+      [t('Minimum'), formatStat(summary.numeric.min)],
+      [t('Maximum'), formatStat(summary.numeric.max)],
+    );
+  }
+  const most = summary.top[0]?.count ?? 1;
+  return (
+    <Dialog open={open} onClose={onClose} title={t('Summary of “{name}”', { name: summary.name })} footer={<Button onClick={onClose}>{t('Close')}</Button>}>
+      <dl className="grid grid-cols-2 gap-x-6 gap-y-2 text-[13px] sm:grid-cols-3" data-testid="column-summary">
+        {stats.map(([label, value]) => (
+          <div key={label}>
+            <dt className="text-xs text-zinc-500">{label}</dt>
+            <dd className="font-medium tabular-nums">{value}</dd>
+          </div>
+        ))}
+      </dl>
+      {summary.top.length > 0 ? (
+        <div className="mt-4">
+          <h3 className="mb-1.5 text-xs font-semibold tracking-wide text-zinc-500 uppercase">{t('Most common values')}</h3>
+          <ul className="flex flex-col gap-1">
+            {summary.top.map((item) => (
+              <li key={item.value} className="relative overflow-hidden rounded-md bg-zinc-50 px-2 py-1 text-xs dark:bg-zinc-800/60">
+                <span className="bar-grow absolute inset-y-0 left-0 bg-brand-100 dark:bg-brand-900/50" style={{ width: `${(item.count / most) * 100}%` }} aria-hidden />
+                <span className="relative flex items-center justify-between gap-3">
+                  <span className="truncate">{item.value}</span>
+                  <span className="shrink-0 font-medium tabular-nums">{formatNumber(item.count)}</span>
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
     </Dialog>
   );
 }

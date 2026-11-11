@@ -97,10 +97,10 @@ export function Onboarding() {
       }
     >
       <div className="flex gap-4" data-testid="onboarding">
-        <div className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-brand-50 text-brand-700 dark:bg-brand-950 dark:text-brand-300">
+        <div key={step} className="brand-gradient pop-in float flex size-12 shrink-0 items-center justify-center rounded-2xl text-white shadow-[0_10px_24px_-8px_rgb(16_169_116/0.7)]">
           <Icon className="size-5" aria-hidden />
         </div>
-        <div className="min-w-0">
+        <div key={`text-${step}`} className="fade-in min-w-0">
           <h3 className="text-[15px] font-semibold">{t(current.title, name)}</h3>
           <p className="mt-1 text-[13px] text-zinc-700 dark:text-zinc-300">{t(current.body, name)}</p>
           <ul className="mt-2 ml-4 list-disc space-y-1 text-[13px] text-zinc-600 dark:text-zinc-400">
@@ -112,7 +112,7 @@ export function Onboarding() {
       </div>
       <div className="mt-5 flex justify-center gap-1.5" aria-hidden>
         {STEPS.map((_, index) => (
-          <span key={index} className={index === step ? 'h-1.5 w-5 rounded-full bg-brand-600' : 'size-1.5 rounded-full bg-zinc-300 dark:bg-zinc-700'} />
+          <span key={index} className={index === step ? 'brand-gradient h-1.5 w-6 rounded-full transition-all duration-300' : 'size-1.5 rounded-full bg-zinc-300 transition-all duration-300 dark:bg-zinc-700'} />
         ))}
       </div>
     </Dialog>

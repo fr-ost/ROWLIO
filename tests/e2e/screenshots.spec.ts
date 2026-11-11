@@ -18,8 +18,12 @@ test('capture screenshots', async ({ connect, context, extensionId, serviceWorke
   await tables.app.screenshot({ path: path.join(OUT, '01-tables.png') });
 
   // 2. Visual selector on the page
-  const shop = await connect('/products', '#/visual');
+  const shop = await connect('/products', '#/');
   await shop.app.setViewportSize(size);
+  await expect(shop.app.getByTestId('home-hero')).toBeVisible();
+  await shop.app.waitForTimeout(1400); // let the counters finish
+  await shop.app.screenshot({ path: path.join(OUT, '00-home.png') });
+  await shop.app.goto(shop.app.url().replace(/#.*/, '#/visual'));
   await shop.target.setViewportSize(size);
   await shop.app.getByTestId('start-picker').click();
   await shop.target.bringToFront();
@@ -52,8 +56,9 @@ test('capture screenshots', async ({ connect, context, extensionId, serviceWorke
   // 7. Popup
   const tabId = await serviceWorker.evaluate(async (url) => (await chrome.tabs.query({})).find((tab) => tab.url === url)?.id ?? -1, tables.target.url());
   const popup = await context.newPage();
-  await popup.setViewportSize({ width: 340, height: 372 });
+  await popup.setViewportSize({ width: 352, height: 440 });
   await popup.goto(`chrome-extension://${extensionId}/popup.html?tab=${tabId}`);
   await expect(popup.getByTestId('popup')).toHaveAttribute('data-phase', 'ready');
+  await popup.waitForTimeout(1000);
   await popup.screenshot({ path: path.join(OUT, '07-popup.png') });
 });

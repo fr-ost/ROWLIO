@@ -26,7 +26,8 @@ import { quickExtractTables, runRecipe } from '@/app/services/actions';
 import { describeError, openDatasets, runExtraction } from '@/app/services/extract';
 import { pickElement, startRecordPicker } from '@/app/services/picker';
 import { ConnectionGate } from '@/app/components/Shell';
-import { Badge, Button, Card, Checkbox, Field, IconButton, Input, PageHeader, Select } from '@/app/components/ui';
+import { Badge, Button, Card, Checkbox, Field, IconButton, Input, Select, cx } from '@/app/components/ui';
+import { Aurora, CountUp, Spotlight } from '@/app/components/fx';
 
 function ActionCard({
   icon: Icon,
@@ -44,10 +45,10 @@ function ActionCard({
   testId?: string;
 }) {
   return (
-    <Card className="flex flex-col gap-3 p-4" data-testid={testId}>
+    <Spotlight className="card-lift flex flex-col gap-3 rounded-xl border border-zinc-200/80 bg-white p-4 shadow-[0_1px_2px_rgb(0_0_0/0.04)] dark:border-zinc-800 dark:bg-zinc-900" data-testid={testId}>
       <div className="flex items-start gap-3">
-        <div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-brand-50 text-brand-700 dark:bg-brand-950 dark:text-brand-300">
-          <Icon className="size-4" aria-hidden />
+        <div className="brand-gradient flex size-9 shrink-0 items-center justify-center rounded-xl text-white shadow-[0_6px_14px_-6px_rgb(16_169_116/0.7)]">
+          <Icon className="size-4.5" aria-hidden />
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
@@ -58,7 +59,21 @@ function ActionCard({
         </div>
       </div>
       <div className="mt-auto flex flex-wrap items-center gap-2">{children}</div>
-    </Card>
+    </Spotlight>
+  );
+}
+
+function StatTile({ icon: Icon, label, value, loading }: { icon: LucideIcon; label: string; value: number | undefined; loading: boolean }) {
+  return (
+    <div className="rounded-xl border border-white/50 bg-white/65 px-3 py-2.5 backdrop-blur-sm transition-transform duration-300 hover:-translate-y-0.5 dark:border-white/10 dark:bg-zinc-900/55">
+      <div className="flex items-center gap-1.5 text-[11px] font-medium text-zinc-600 dark:text-zinc-400">
+        <Icon className="size-3.5 text-brand-600 dark:text-brand-300" aria-hidden />
+        {label}
+      </div>
+      <div className={cx('mt-0.5 text-xl leading-tight font-semibold tracking-tight', value ? 'text-zinc-900 dark:text-white' : 'text-zinc-400 dark:text-zinc-500')}>
+        {value === undefined ? <span className={cx('inline-block h-5 w-10 rounded', loading && 'shimmer')} /> : <CountUp value={value} />}
+      </div>
+    </div>
   );
 }
 
@@ -91,7 +106,7 @@ function SelectorInput({
   );
 }
 
-type PageCategory = 'ol' | 'ul' | 'dl' | 'headings' | 'breadcrumbs' | 'meta' | 'jsonld' | 'microdata';
+type PageCategory = 'ol' | 'ul' | 'dl' | 'headings' | 'breadcrumbs' | 'meta' | 'jsonld' | 'microdata' | 'contacts';
 
 const CATEGORY_LABELS: [PageCategory, string][] = [
   ['ol', 'Ordered lists'],
@@ -102,6 +117,7 @@ const CATEGORY_LABELS: [PageCategory, string][] = [
   ['meta', 'Metadata (title, description, canonical, Open Graph, Twitter Cards)'],
   ['jsonld', 'JSON-LD structured data'],
   ['microdata', 'Schema.org microdata'],
+  ['contacts', 'Emails, phone numbers and social profiles'],
 ];
 
 export function HomePage() {
@@ -147,6 +163,7 @@ export function HomePage() {
     if (categories.has('meta')) specs.push({ kind: 'metadata', options: meta });
     if (categories.has('jsonld')) specs.push({ kind: 'jsonld' });
     if (categories.has('microdata')) specs.push({ kind: 'microdata' });
+    if (categories.has('contacts')) specs.push({ kind: 'contacts' });
     if (specs.length === 0) {
       toast.info(t('Choose at least one category.'));
       return;
@@ -163,11 +180,31 @@ export function HomePage() {
 
   return (
     <ConnectionGate>
-      <div className="mx-auto flex max-w-6xl flex-col gap-5 p-6">
-        <PageHeader
-          title={t('Extract')}
-          description={status === 'ready' ? t('Choose what to pull out of “{title}”.', { title: title || url }) : brand.tagline}
-        />
+      <div className="page-enter mx-auto flex max-w-6xl flex-col gap-5 p-6">
+        <section className="relative overflow-hidden rounded-2xl border border-zinc-200/80 bg-white p-6 shadow-[0_1px_2px_rgb(0_0_0/0.04),0_20px_50px_-30px_rgb(16_169_116/0.45)] dark:border-zinc-800 dark:bg-zinc-900" data-testid="home-hero">
+          <Aurora />
+          <div className="relative">
+            <p className="text-[11px] font-semibold tracking-[0.14em] text-brand-700 uppercase dark:text-brand-300">{status === 'ready' ? t('Connected page') : brand.category}</p>
+            <h1 className="mt-1 max-w-3xl text-2xl font-semibold tracking-tight text-zinc-900 dark:text-white">
+              {status === 'ready' ? (
+                <>
+                  {t('What do you want from')} <span className="gradient-text">{title || url}</span>?
+                </>
+              ) : (
+                brand.tagline
+              )}
+            </h1>
+            <p className="mt-1 max-w-2xl truncate text-[13px] text-zinc-600 dark:text-zinc-400">{status === 'ready' ? url : t('Reading the page…')}</p>
+            <div className="stagger mt-4 grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-6">
+              <StatTile icon={Table2} label={t('Tables')} value={scan?.dataTables} loading={!scan} />
+              <StatTile icon={MousePointerClick} label={t('Repeating lists')} value={scan?.patterns} loading={!scan} />
+              <StatTile icon={Link2} label={t('Links')} value={scan?.links} loading={!scan} />
+              <StatTile icon={ImageIcon} label={t('Images')} value={scan?.images} loading={!scan} />
+              <StatTile icon={List} label={t('Headings')} value={scan?.headings} loading={!scan} />
+              <StatTile icon={Braces} label={t('Structured data')} value={scan ? scan.jsonLd + scan.microdata : undefined} loading={!scan} />
+            </div>
+          </div>
+        </section>
 
         {recipes.length > 0 ? (
           <Card className="p-4" data-testid="matching-recipes">
@@ -192,7 +229,7 @@ export function HomePage() {
           </Card>
         ) : null}
 
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <div className="stagger grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           <ActionCard icon={Table2} title={t('Tables')} description={t('HTML tables with headers, merged cells and nested tables handled.')} count={scan?.dataTables} testId="card-tables">
             <Button variant="primary" loading={busy === 'tables'} disabled={!scan || scan.dataTables === 0} data-testid="home-extract-tables" onClick={async () => {
               setBusy('tables');
@@ -218,8 +255,9 @@ export function HomePage() {
             <Button onClick={() => navigate('/selectors')}>{t('Open Advanced Selectors')}</Button>
           </ActionCard>
 
-          <ActionCard icon={Layers} title={t('Multiple pages')} description={t('Follow next-page links or infinite scroll, within limits you set.')}>
-            <Button onClick={() => navigate('/pagination')}>{t('Set up pagination')}</Button>
+          <ActionCard icon={Layers} title={t('Multiple pages')} description={t('Follow next-page links, infinite scroll, or a list of addresses, within limits you set.')}>
+            <Button onClick={() => navigate('/pagination')}>{t('Pagination')}</Button>
+            <Button onClick={() => navigate('/batch')}>{t('Batch URLs')}</Button>
             {scan?.hasNextPage ? <Badge tone="brand">{t('Next page detected')}</Badge> : null}
           </ActionCard>
         </div>

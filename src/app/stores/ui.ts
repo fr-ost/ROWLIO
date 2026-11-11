@@ -3,10 +3,11 @@ import { create } from 'zustand';
 import type { Settings } from '@/types';
 import { DEFAULT_SETTINGS } from '@/types';
 import { loadSettings, saveSettings } from '@/storage/settings';
+import { playSfx, setSoundEnabled } from '@/app/services/sfx';
 
 // ---- routing (hash based: works from a chrome-extension:// page without a server) ----------
 
-export const ROUTES = ['/', '/tables', '/visual', '/selectors', '/pagination', '/data', '/projects', '/recipes', '/settings', '/help'] as const;
+export const ROUTES = ['/', '/tables', '/visual', '/selectors', '/pagination', '/batch', '/data', '/projects', '/recipes', '/settings', '/help'] as const;
 export type Route = (typeof ROUTES)[number];
 
 function parseHash(): Route {
@@ -69,9 +70,9 @@ export const useUi = create<UiState>((set, get) => ({
   setRoute: (route) => set({ route }),
   pushToast: (toast) => {
     const id = nextToastId++;
+    playSfx(toast.kind);
     set({ toasts: [...get().toasts.slice(-4), { ...toast, id }] });
-    const ttl = toast.kind === 'error' ? 12_000 : toast.kind === 'warning' ? 9_000 : 5_000;
-    window.setTimeout(() => get().dismissToast(id), ttl);
+    window.setTimeout(() => get().dismissToast(id), TOAST_TTL[toast.kind]);
     return id;
   },
   dismissToast: (id) => set({ toasts: get().toasts.filter((toast) => toast.id !== id) }),
@@ -111,6 +112,14 @@ export const toast = {
   info: (message: string, detail?: string) => useUi.getState().pushToast({ kind: 'info', message, detail }),
   warning: (message: string, detail?: string) => useUi.getState().pushToast({ kind: 'warning', message, detail }),
 };
+
+/** Apply the sound and motion preferences (motion is read by CSS through data-motion). */
+export function applyFeel(settings: Pick<Settings, 'sound' | 'animations'>): void {
+  setSoundEnabled(settings.sound);
+  document.documentElement.dataset.motion = settings.animations ? 'on' : 'off';
+}
+
+export const TOAST_TTL: Record<ToastKind, number> = { success: 5_000, info: 5_000, warning: 9_000, error: 12_000 };
 
 /** Apply the theme setting to <html>. */
 export function applyTheme(theme: Settings['theme']): void {

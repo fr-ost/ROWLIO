@@ -31,6 +31,8 @@ export function describeSpec(spec: ExtractSpec): string {
       return t('JSON-LD');
     case 'microdata':
       return t('Microdata');
+    case 'contacts':
+      return t('Emails, phone numbers and social profiles');
   }
 }
 
@@ -45,6 +47,7 @@ export const METHOD_LABELS: Record<ExtractSpec['kind'], string> = {
   metadata: 'Metadata',
   jsonld: 'JSON-LD',
   microdata: 'Microdata',
+  contacts: 'Contacts',
 };
 
 export function RecipeDialog({

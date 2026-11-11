@@ -34,8 +34,11 @@ granted until you approve a specific site. Granted sites are listed under
 | `storage` | Settings, projects and recipes are kept in IndexedDB, which needs no permission. |
 | `downloads` | Exports are saved with an ordinary download link (`<a download>`). |
 | `clipboardWrite` | Copy uses the standard clipboard API in response to your click. |
-| `tabs` | Tab titles and URLs are visible only for the tab you granted access to; that is all Rowlio needs. |
+| `tabs` | Tab titles and URLs are visible only for the tab you granted access to; that is all Rowlio needs. Batch URLs changes the address of that one connected tab with `chrome.tabs.update`, which needs no permission. |
 | `webNavigation`, `webRequest`, `cookies`, `history`, `bookmarks`, `alarms`, `notifications`, `identity`, `nativeMessaging`, `debugger`, `unlimitedStorage` | Not used. |
+
+Version 1.1.0 added features (batch URLs, contacts, file import, new exports, sound and
+motion) **without adding any permission**.
 
 ## Other manifest entries
 
@@ -49,6 +52,8 @@ granted until you approve a specific site. Granted sites are listed under
   grants `activeTab` for the current tab exactly like a click.
 - No `externally_connectable`, no `web_accessible_resources`: web pages cannot message the
   extension or load its files.
+- `homepage_url`: the Unique Labs website, shown by Chrome on the extension's details
+  page.
 - `minimum_chrome_version`: 120.
 
 ## Text for the Chrome Web Store "permission justification" form

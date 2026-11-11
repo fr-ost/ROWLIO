@@ -35,7 +35,13 @@ export type TransformOp =
   | { type: 'moveColumn'; column: string; toIndex: number }
   | { type: 'editCell'; rowId: number; column: string; value: string }
   | { type: 'promoteHeader' }
-  | { type: 'demoteHeader' };
+  | { type: 'demoteHeader' }
+  /** First regex match (or its first capture group) of each cell. */
+  | { type: 'extractRegex'; column: string; pattern: string; caseSensitive: boolean; target: 'replace' | 'new' }
+  /** Copy the value above into empty cells. */
+  | { type: 'fillDown'; columns?: string[] }
+  | { type: 'addColumn'; name: string; fill: 'empty' | 'rowNumber' | 'value'; value?: string }
+  | { type: 'addRow' };
 
 export interface TransformResult {
   data: TableData;
@@ -75,7 +81,7 @@ export interface ViewSpec {
   duplicatesOnly?: boolean;
 }
 
-export type ExportFormat = 'csv' | 'tsv' | 'json' | 'jsonl' | 'xlsx';
+export type ExportFormat = 'csv' | 'tsv' | 'json' | 'jsonl' | 'xlsx' | 'markdown' | 'html';
 
 export interface ExportOptions {
   format: ExportFormat;

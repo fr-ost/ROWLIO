@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Privacy · {{name}}</title>
+  <meta name="description" content="{{name}} does not collect, transmit or share any data. Everything happens in your browser.">
+  <meta name="theme-color" content="#06120e">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/icons/icon-32.png">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="bg" aria-hidden="true"><i></i><i></i><i></i><span class="grid"></span></div>
+  <main class="doc">
+    <a class="back" href="./">← Back to {{name}}</a>
+    <h1>Privacy</h1>
+    <p>{{name}} is built so that your data never has to leave your computer.</p>
+
+    <h2>Summary</h2>
+    <ul>
+      <li>{{name}} does <strong>not</strong> collect, transmit, sell or share any data.</li>
+      <li>There is no account, no server, no analytics, no telemetry, no advertising and no remote AI service.</li>
+      <li>{{name}} reads a page only after you invoke it on that page.</li>
+      <li>Extracted data is kept in memory in the workspace tab. It is written to disk only when you save a project or export a file.</li>
+      <li>You can delete everything {{name}} stores, at any time.</li>
+    </ul>
+
+    <h2>What {{name}} reads</h2>
+    <p>When you click the {{name}} icon (or use one of its keyboard shortcuts) on a tab, Chrome grants the extension temporary access to that tab. {{name}} then reads the content of that page, the same content you can see, to show what the page contains and to perform the extraction you ask for.</p>
+    <p>{{name}} does not read pages you have not invoked it on, does not run in the background and does not record your browsing history. Password fields are not read.</p>
+
+    <h2>What {{name}} stores, and where</h2>
+    <table>
+      <thead><tr><th>Data</th><th>Where</th><th>How to remove</th></tr></thead>
+      <tbody>
+        <tr><td>Records you are working on</td><td>Memory of the workspace tab</td><td>Close the dataset or the tab</td></tr>
+        <tr><td>Saved projects</td><td>IndexedDB in your Chrome profile, only when you press Save</td><td>Projects → Delete, or Settings → Delete all saved data</td></tr>
+        <tr><td>Recipes (selectors and options, no page content)</td><td>IndexedDB</td><td>Saved Recipes → Delete</td></tr>
+        <tr><td>Settings</td><td>IndexedDB</td><td>Settings → Reset</td></tr>
+        <tr><td>Exported files</td><td>Your downloads folder</td><td>Delete the files</td></tr>
+      </tbody>
+    </table>
+    <p>Removing the extension removes its storage. Nothing is synchronised between devices.</p>
+
+    <h2>What {{name}} sends</h2>
+    <p>Nothing. The extension contains no code that performs network requests, and its pages run under a Content Security Policy that makes the browser block connections to any remote server.</p>
+    <p>The page you are extracting from keeps behaving as usual: when {{name}} follows a next-page link, scrolls a feed, or opens the addresses in a list you gave it, the website loads its own content exactly as if you had clicked, scrolled or typed the address yourself.</p>
+    <p>The extension shows two credit links (to {{company}} and to the developer). They are ordinary links and contact those sites only if you click them.</p>
+
+    <h2>Permissions</h2>
+    <ul>
+      <li><code>activeTab</code>: temporary access to the tab you invoke {{name}} on.</li>
+      <li><code>scripting</code>: lets {{name}} run its own bundled script in that tab.</li>
+      <li>Optional access to a single site, only if you ask for it, confirmed by Chrome.</li>
+    </ul>
+
+    <h2>This website</h2>
+    <p>This website is static. It sets no cookies, loads nothing from third parties and contains no analytics. Your sound preference is kept in your browser's local storage. Like any website, the company that hosts it can see ordinary request data, such as IP addresses, in its server logs.</p>
+
+    <h2>Your responsibility</h2>
+    <p>{{name}} has no knowledge of what a page contains. You are responsible for the data you choose to extract, including other people's personal data, and for respecting each website's terms and applicable laws.</p>
+
+    <p style="margin-top:44px">{{copyright}}. A Product of <a class="back" href="{{companyUrl}}" target="_blank" rel="noopener">{{company}}</a>. Developed by <a class="back" href="{{developerUrl}}" target="_blank" rel="noopener">{{developer}}</a>.</p>
+  </main>
+</body>
+</html>

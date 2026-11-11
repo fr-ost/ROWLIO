@@ -22,12 +22,18 @@
     "ink": "#18181b"
   },
   "urls": {
-    "homepage": "",
+    "homepage": "https://www.uniquelabs.org",
     "support": "",
     "privacyPolicy": "",
     "sourceCode": ""
   },
   "filePrefix": "rowlio",
   "projectFileExtension": ".rowlio.json",
-  "recipeFileExtension": ".rowlio-recipes.json"
+  "recipeFileExtension": ".rowlio-recipes.json",
+  "copyright": "© 2026 Unique Labs",
+  "productOf": "A Product of Unique Labs",
+  "developer": {
+    "name": "Shahriar Ahmed",
+    "url": "https://t.me/igfrostt"
+  }
 }

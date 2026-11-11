@@ -12,7 +12,8 @@ test.describe('projects and recipes', () => {
     await app.getByTestId('project-name').fill('বাংলা প্রকল্প');
     await app.getByLabel('Folder').fill('Research');
     await app.getByTestId('save-project-confirm').click();
-    await expect(app.getByTestId('save-state')).toContainText('saved');
+    // “Not saved yet” also contains “saved”: wait for the confirmation that follows the write.
+    await expect(app.getByTestId('save-state')).toContainText('· saved');
 
     // Nothing is kept in memory across a reload: the project must come from IndexedDB.
     await app.reload();

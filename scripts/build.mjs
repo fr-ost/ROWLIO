@@ -60,6 +60,7 @@ function manifest() {
     description: '__MSG_extDescription__',
     version: pkg.version,
     default_locale: 'en',
+    ...(brand.urls.homepage ? { homepage_url: brand.urls.homepage } : {}),
     minimum_chrome_version: '120',
     icons: {
       16: 'icons/icon-16.png',
