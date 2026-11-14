@@ -1,0 +1,44 @@
+<!-- {"title": "Support", "heading": "Support", "description": "Install, update and troubleshoot Rowlio: step-by-step setup, fixes for common problems and how to get help."} -->
+<h2>Install {{name}}</h2>
+<ol>
+  <li><a href="/{{zip}}" download>Download {{name}} v{{version}}</a> ({{zipSize}}) and unzip it to a folder you will keep.</li>
+  <li>In Chrome, open <code>chrome://extensions</code>.</li>
+  <li>Switch on <strong>Developer mode</strong> in the top right corner.</li>
+  <li>Click <strong>Load unpacked</strong> and choose the unzipped folder.</li>
+  <li>Click the puzzle icon in the toolbar and pin {{name}}.</li>
+</ol>
+<p>Then open any web page and click the {{name}} icon.</p>
+
+<h2>Update to a new version</h2>
+<ol>
+  <li>Download the new archive and unzip it over the old folder, replacing its files.</li>
+  <li>Open <code>chrome://extensions</code> and click the reload arrow on the {{name}} card.</li>
+</ol>
+<p>Saved projects, recipes and settings are kept, as long as you update the same folder instead of removing the extension first.</p>
+
+<h2>Troubleshooting</h2>
+<details><summary>{{name}} says it cannot read this page</summary><p>Chrome does not allow any extension to run on its own pages (addresses starting with <code>chrome://</code>), on the Chrome Web Store and on a few other protected pages. Open an ordinary web page and try again.</p></details>
+<details><summary>The workspace asks me to grant access or click the icon again</summary><p>{{name}} gets access to one site in one tab when you click its icon there. If the tab moves to a different site, that access ends. Click the icon on the new page. For a site you use often, choose "Always allow on this site" in the workspace.</p></details>
+<details><summary>No tables were found, but I can see one</summary><p>Some pages draw table-like layouts without using a real table. Use "Select items on the page" and click one row instead. If the table appears only after you scroll or click something on the page, do that first and press Rescan.</p></details>
+<details><summary>The selector picked too many or too few items</summary><p>Press Wider or Narrower in the panel on the page to move between levels of the page structure. If nothing repeats around your click, click a second example and {{name}} works out what the two have in common.</p></details>
+<details><summary>My CSV shows strange characters in Excel</summary><p>Keep the "Add a UTF-8 marker (BOM)" option switched on when exporting, or export to Excel (XLSX) instead, which avoids the problem completely.</p></details>
+<details><summary>Everything is in one column when I open the CSV</summary><p>Your Excel expects a semicolon between values. Export with the semicolon delimiter, or use Data → From Text/CSV in Excel and pick the delimiter there.</p></details>
+<details><summary>Some images are missing from the list</summary><p>Many pages load images only when they scroll into view. Scroll through the page once, then extract again.</p></details>
+<details><summary>A multi-page run stopped early</summary><p>Look at the reason shown in the run summary. Usual causes are a limit you set, no further "next" control, or a page that returned the same records twice. Raise the limit or point {{name}} at the correct next-page control.</p></details>
+<details><summary>A batch run skipped some addresses</summary><p>A batch stays on the site you started it from. Addresses on other sites are skipped unless you granted access to that site under Settings → Site access.</p></details>
+<details><summary>My data disappeared after I closed the tab</summary><p>Extracted rows live in the workspace tab until you save them as a project or export them. Closing the tab discards unsaved data. Use Save before closing.</p></details>
+<details><summary>I hear no sounds, or I want them off</summary><p>Sound effects and animations each have a switch under Settings in the extension. Chrome plays sound only after your first click on the page.</p></details>
+
+<h2>Remove {{name}} or its data</h2>
+<p>To delete saved projects, recipes and settings, open Settings in the extension and choose "Delete all saved data". To remove the extension itself, open <code>chrome://extensions</code> and click Remove. That also deletes everything it stored.</p>
+
+<h2>Keyboard shortcuts</h2>
+<ul>
+  <li><code>Alt+Shift+R</code> opens the popup.</li>
+  <li><code>Alt+Shift+W</code> opens the workspace for the current tab.</li>
+  <li><code>Alt+Shift+S</code> starts the visual selector.</li>
+</ul>
+<p>You can change them at <code>chrome://extensions/shortcuts</code>.</p>
+
+<h2>Still stuck?</h2>
+<p>Read the <a href="/faq">FAQ</a>, browse the <a href="/blog">guides</a>, or <a href="/contact">get in touch</a>.</p>

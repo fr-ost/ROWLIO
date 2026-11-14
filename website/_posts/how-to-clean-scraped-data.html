@@ -1,0 +1,53 @@
+<!-- {"title": "How to Clean Scraped Data: A Step-by-Step Checklist", "description": "A repeatable order for cleaning scraped data: whitespace, duplicates, empty rows, numbers, dates, split columns and a final check before export.", "date": "2026-11-14", "tag": "Tutorial", "order": 8} -->
+<p>Data taken from a web page is written for people to read, and it shows. Prices carry currency symbols, names have stray spaces, the same item appears twice, and a date is written three different ways. Cleaning is what turns that into something you can sort, total and trust. The order of the steps matters, because some fixes only work after others. This is the order that causes the least rework.</p>
+
+<h2>Before you change anything</h2>
+<p>Keep the original. Every cleaning step is a decision, and some of them will be wrong. Work in a tool that lets you undo each step and return to the data as extracted. In Rowlio the original extraction is always kept, every operation can be undone, and each one reports how many cells it changed, so a step that touched 4,000 cells when you expected 40 is noticed at once.</p>
+<p>Then look at the shape of the data: how many rows and columns, which columns have empty cells, and what kind of values each column holds. A column summary showing the count of distinct values and the most frequent ones reveals most problems before you start.</p>
+
+<h2>Step 1: trim and normalise whitespace</h2>
+<p>Web text is full of invisible characters: leading and trailing spaces, line breaks inside a cell, runs of several spaces, non-breaking spaces. They make <code>"Dhaka"</code> and <code>"Dhaka "</code> different values, which breaks every later step that compares cells.</p>
+<p>Do this first, on every column. Trim the ends and collapse runs of whitespace into a single space.</p>
+
+<h2>Step 2: remove empty rows and columns</h2>
+<p>Spacer rows, advertising slots and decorative columns often come along with the real content. Remove rows and columns that are entirely empty. Be more careful with rows that are only partly empty: a product without a rating is still a product.</p>
+
+<h2>Step 3: remove duplicates</h2>
+<p>Duplicates come from promoted items repeated on each page, from listings that shifted while you were collecting, and from overlapping runs. Remove them after whitespace is fixed, or near-identical rows will be missed.</p>
+<p>Think about what makes two rows the same. Rows identical in every column are safe to remove. Rows that share an address or a product ID but differ elsewhere need a decision about which one to keep.</p>
+
+<h2>Step 4: split what is combined</h2>
+<p>One cell often holds several facts: <code>"Lisbon, Portugal"</code>, <code>"4.5 (128 reviews)"</code>, <code>"Size: M / Colour: Blue"</code>. Split by the delimiter into separate columns, or pull out one part with a pattern. A regular expression such as <code>(\d+) reviews</code> extracts the review count and leaves the rest alone.</p>
+<p>Do this before converting numbers, so each new column holds one kind of value.</p>
+
+<h2>Step 5: convert numbers</h2>
+<p>A price like <code>$1,299.00</code> is text until the symbol and the thousands separator are removed. Three things to watch:</p>
+<ul>
+  <li><strong>Decimal conventions.</strong> <code>1.299,00</code> is the same amount written the European way. A converter has to recognise both.</li>
+  <li><strong>Digits in other scripts.</strong> <code>১২৫০</code> is 1250 in Bengali digits and should convert like any other number.</li>
+  <li><strong>Things that only look like numbers.</strong> Postcodes, phone numbers and product codes are identifiers. Leave them as text, or <code>00123</code> becomes 123.</li>
+</ul>
+<p>Afterwards, sort the column and look at both ends. Leftover text sorts to one end and is easy to spot.</p>
+
+<h2>Step 6: standardise dates</h2>
+<p>Convert dates to the ISO form <code>2024-04-03</code>. It sorts correctly as text and is read the same way everywhere.</p>
+<p>The trap is ambiguity. <code>03/04/2024</code> is 3 April or 4 March depending on the country, and nothing in the value tells you which. A careful tool converts only unambiguous dates, such as <code>3 April 2024</code> or <code>25/12/2024</code>, and leaves the doubtful ones untouched and counted. Check how the source site writes dates, then deal with the rest deliberately.</p>
+
+<h2>Step 7: make text consistent</h2>
+<p>Categories typed by people vary: <code>In stock</code>, <code>in stock</code>, <code>IN STOCK</code>. Pick one form and apply it with a case conversion or find and replace. Normalise addresses in a URL column as well, so the same link is not counted twice because of a trailing slash.</p>
+<p>Where a value is shown only once for a group, with empty cells beneath it, use fill down so that every row carries its own value.</p>
+
+<h2>Step 8: name and order the columns</h2>
+<p>Rename columns to say what they contain: <code>price_usd</code> tells the next reader more than <code>Text 3</code>. Put identifying columns first and delete helper columns you no longer need.</p>
+
+<h2>The final check</h2>
+<ul>
+  <li>Row count: does it match what the site showed, minus the duplicates you removed?</li>
+  <li>Empty cells: is each one a true absence, or a value the extraction missed?</li>
+  <li>Numeric columns: do the minimum, maximum and average look plausible?</li>
+  <li>Spot check: compare three random rows with the live page.</li>
+</ul>
+<p>Then export. If the file is going to a spreadsheet, <a href="/blog/export-website-data-to-csv">exporting to CSV correctly</a> covers encoding, delimiters and identifiers, and <a href="/blog/csv-formula-injection-explained">formula injection</a> explains why some cells need protecting.</p>
+
+<h2>Make it repeatable</h2>
+<p>If you will collect the same data again next month, write down the steps you applied, in order. Cleaning done the same way each time is what makes two months of data comparable.</p>

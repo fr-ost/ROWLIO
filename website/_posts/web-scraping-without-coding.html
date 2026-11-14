@@ -1,0 +1,57 @@
+<!-- {"title": "Web Scraping Without Coding: A Beginner's Guide", "description": "What web scraping is, how point-and-click tools find the data on a page, and a first project you can finish in ten minutes with no code.", "date": "2026-11-14", "tag": "Guide", "order": 2} -->
+<p>Web scraping means collecting information from web pages in a structured form, usually rows and columns. For years that meant writing a script. Today a browser extension can do the common cases with a few clicks. This guide explains how that works, so you know what to expect and what to do when a page does not cooperate.</p>
+
+<h2>What "structured data" means</h2>
+<p>A product page shows a name, a price, a rating and a photo. To a person that is obvious. To a computer the page is a long tree of nested elements with no labels saying "this is the price". Scraping is the step that turns that tree into a table where each row is one product and each column is one kind of fact.</p>
+<p>Once data is in rows, you can sort it, filter it, count it, chart it or load it into another program. That is the whole point.</p>
+
+<h2>How no-code tools find the data</h2>
+<p>Web pages are repetitive. A list of twenty search results is the same block of HTML twenty times with different text inside. No-code scrapers exploit this in three ways.</p>
+<ul>
+  <li><strong>Tables.</strong> An HTML table already has rows and columns. The tool reads them directly.</li>
+  <li><strong>Repeating items.</strong> You click one item, such as one product card. The tool looks for sibling elements with the same structure and treats each as a record.</li>
+  <li><strong>Fields inside an item.</strong> Within each record, the tool looks for parts that appear in the same place every time: a heading, a link, an image, something that looks like a price or a date.</li>
+</ul>
+<p>None of this needs artificial intelligence or a server. It is pattern matching on the page your browser has already loaded.</p>
+
+<h2>Your first extraction, step by step</h2>
+<p>Pick a page with a list of similar things: a shop category, a directory, a list of articles. Then, with Rowlio installed:</p>
+<ol>
+  <li>Open the page and click the Rowlio icon.</li>
+  <li>Choose <strong>Select items on the page</strong>.</li>
+  <li>Click one item in the list. The similar items are outlined, and a panel shows how many were found and which fields were detected.</li>
+  <li>If too little is outlined, press <strong>Wider</strong>. If too much, press <strong>Narrower</strong>.</li>
+  <li>Rename the fields so the columns make sense, remove the ones you do not need, and confirm.</li>
+  <li>Review the rows in the data preview and export them.</li>
+</ol>
+<p>The first attempt takes a few minutes. After that it takes seconds, and you can save the setup as a recipe so the same site works with one click next time.</p>
+
+<h2>When the automatic detection gets it wrong</h2>
+<p>It will, sometimes. Pages are built in countless ways. The usual fixes:</p>
+<ul>
+  <li><strong>Only part of each item is selected.</strong> You clicked something inside the card, and the tool matched that inner element. Go wider.</li>
+  <li><strong>A field is missing.</strong> Add it by clicking the value inside one record. The tool finds the same spot in the others.</li>
+  <li><strong>Some rows have an empty cell.</strong> Often correct: that item really has no rating or no discount. Check one on the page before assuming an error.</li>
+  <li><strong>Nothing repeats.</strong> Click a second example. Two examples are enough to work out what they have in common.</li>
+</ul>
+<p>If a page still resists, a hand-written selector gives you full control. <a href="/blog/css-selectors-vs-xpath-for-web-scraping">CSS selectors and XPath</a> are easier than they look.</p>
+
+<h2>What no-code scraping cannot do</h2>
+<p>It helps to know the limits before you start.</p>
+<ul>
+  <li><strong>It reads what the browser shows.</strong> Content behind a login you do not have, or behind a paywall, is not available, and a responsible tool will not try to get around that.</li>
+  <li><strong>Text inside images is not text.</strong> A price baked into a banner image cannot be read without OCR.</li>
+  <li><strong>Content in embedded frames from another site</strong> is walled off by the browser for security reasons.</li>
+  <li><strong>Very large jobs</strong>, such as hundreds of thousands of pages, are a job for a programmed crawler with proper infrastructure, not a browser extension.</li>
+</ul>
+
+<h2>Good habits from day one</h2>
+<ul>
+  <li><strong>Check the site's terms</strong> and take only what you need. <a href="/blog/is-web-scraping-legal">Is web scraping legal?</a> covers the questions to ask.</li>
+  <li><strong>Go slowly.</strong> When collecting several pages, leave a delay between them. You are a guest on someone else's server.</li>
+  <li><strong>Keep the source.</strong> Record the page address and the date with your data. You will want it when someone asks where a number came from.</li>
+  <li><strong>Look before you export.</strong> Scan the rows for obvious problems. Five seconds here saves an hour later.</li>
+</ul>
+
+<h2>Where to go next</h2>
+<p>Once single pages are easy, the next steps are <a href="/blog/scrape-paginated-websites-and-infinite-scroll">collecting several pages in one run</a> and <a href="/blog/how-to-clean-scraped-data">cleaning what you collected</a>. Both are still point and click.</p>

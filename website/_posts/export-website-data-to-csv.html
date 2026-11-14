@@ -1,0 +1,62 @@
+<!-- {"title": "How to Export Website Data to CSV (and Open It Correctly)", "description": "Export data from a web page to CSV, and avoid the classic problems: broken characters, wrong delimiters, lost leading zeros and split columns.", "date": "2026-11-14", "tag": "Tutorial", "order": 3} -->
+<p>CSV is the most widely accepted data format there is. Every spreadsheet, database and analysis tool reads it. It is also the format people most often open and find broken: strange characters, everything in one column, phone numbers turned into scientific notation. Almost all of these problems come from how the file is opened, and all of them are avoidable.</p>
+
+<h2>What a CSV file actually is</h2>
+<p>A CSV file is plain text. Each line is a row, and a delimiter, usually a comma, separates the values:</p>
+<pre><code>Name,Price,City
+"Tea, premium",12.50,Dhaka
+Coffee,9.00,Lisbon</code></pre>
+<p>Two rules matter. A value that contains the delimiter, a quote or a line break is wrapped in double quotes, as in the first row above. And a quote inside a quoted value is written twice. Tools that follow these rules can exchange any text safely. Problems start when a file is written or read by something that ignores them.</p>
+
+<h2>Getting web data into a CSV</h2>
+<p>With a browser extractor the route is short. In Rowlio:</p>
+<ol>
+  <li>Extract the table or list from the page.</li>
+  <li>Check the rows in the data preview and remove columns you do not need.</li>
+  <li>Choose <strong>Export</strong>, pick CSV, and download.</li>
+</ol>
+<p>You can export all rows, only the rows that match your current filter, or only the rows you selected. The file is created in the browser and saved by an ordinary download.</p>
+
+<h2>Problem 1: broken characters</h2>
+<p>You export names like "Zoë" or "ঢাকা" and Excel shows "ZoÃ«" or a row of symbols. The file is fine. It is encoded as UTF-8, which is the standard, but Excel assumed an older regional encoding when you double-clicked it.</p>
+<p>The fix is a three-byte marker at the start of the file called a BOM. It tells Excel "this is UTF-8". Rowlio adds it by default. If you receive a file without one, import it through <strong>Data → From Text/CSV</strong> and choose "65001: Unicode (UTF-8)" as the file origin.</p>
+
+<h2>Problem 2: everything lands in one column</h2>
+<p>In many European and other locales the comma is the decimal separator, so Excel there expects a semicolon between values. A comma-separated file then opens as one wide column.</p>
+<p>Either export with a semicolon delimiter if the file is meant for Excel in such a locale, or import the file through <strong>Data → From Text/CSV</strong>, where you can choose the delimiter yourself. For exchange between programs, stay with the comma.</p>
+
+<h2>Problem 3: values that change by themselves</h2>
+<p>Spreadsheets try to be helpful and convert text that looks like something else:</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>In the file</th><th>What Excel may show</th><th>Why</th></tr></thead>
+  <tbody>
+    <tr><td><code>00123</code></td><td>123</td><td>Treated as a number</td></tr>
+    <tr><td><code>8801712345678</code></td><td>8.80171E+12</td><td>Long number shown in scientific notation</td></tr>
+    <tr><td><code>3-4</code></td><td>3 April</td><td>Looks like a date</td></tr>
+    <tr><td><code>1E5</code></td><td>100000</td><td>Scientific notation</td></tr>
+  </tbody>
+</table>
+</div>
+<p>The CSV format has no way to say "this column is text". You have two options. Import through <strong>Data → From Text/CSV</strong> and set the column type to Text, or export to XLSX instead, where each cell carries its type and identifiers stay exactly as written.</p>
+
+<h2>Problem 4: a file that runs formulas</h2>
+<p>A cell that starts with <code>=</code>, <code>+</code>, <code>-</code> or <code>@</code> can be treated as a formula when the file is opened. With scraped data, that text came from a web page you do not control. This is a real security issue called CSV injection, and a careful exporter neutralises such cells. <a href="/blog/csv-formula-injection-explained">CSV formula injection explained</a> has the details.</p>
+
+<h2>CSV or something else?</h2>
+<ul>
+  <li><strong>CSV</strong> when another program will read the data, or when you want the simplest possible file.</li>
+  <li><strong>Excel (XLSX)</strong> when a person will open it in a spreadsheet. Types, Unicode and several sheets all work without import steps.</li>
+  <li><strong>JSON</strong> when a developer or an API will consume it.</li>
+</ul>
+
+<h2>A checklist for a clean CSV</h2>
+<ul>
+  <li>UTF-8 with a BOM if Excel will open it.</li>
+  <li>The delimiter matches the reader's locale, or you import instead of double-clicking.</li>
+  <li>Identifiers, postcodes and phone numbers are imported as text.</li>
+  <li>Formula-like cells are protected.</li>
+  <li>The header row is present and the column names are meaningful.</li>
+  <li>Row count in the file equals the row count you extracted.</li>
+</ul>
+<p>With those six points covered, a CSV behaves the same wherever it goes.</p>

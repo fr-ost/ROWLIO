@@ -1,0 +1,67 @@
+<!-- {"title": "CSS Selectors vs XPath for Web Scraping: Which to Use", "description": "A practical comparison of CSS selectors and XPath for data extraction, with the patterns you will actually use and advice on writing selectors that last.", "date": "2026-11-14", "tag": "Reference", "order": 4} -->
+<p>Point-and-click selection handles most pages. For the rest, you tell the scraper exactly which elements you want with a selector. There are two languages for this, CSS selectors and XPath. Both are small, and you need only a handful of patterns from each. This article shows those patterns side by side and explains when one is the better choice.</p>
+
+<h2>The short answer</h2>
+<p>Use <strong>CSS selectors</strong> by default. They are shorter, easier to read and enough for nine cases out of ten. Reach for <strong>XPath</strong> when you need to select by the text an element contains, move from an element up to its parent, or pull an attribute or a count directly.</p>
+
+<h2>The same task in both</h2>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>You want</th><th>CSS</th><th>XPath</th></tr></thead>
+  <tbody>
+    <tr><td>Every link</td><td><code>a</code></td><td><code>//a</code></td></tr>
+    <tr><td>Elements with a class</td><td><code>.price</code></td><td><code>//*[contains(@class,"price")]</code></td></tr>
+    <tr><td>An element by id</td><td><code>#results</code></td><td><code>//*[@id="results"]</code></td></tr>
+    <tr><td>Titles inside cards</td><td><code>.card h2</code></td><td><code>//*[contains(@class,"card")]//h2</code></td></tr>
+    <tr><td>Direct children only</td><td><code>ul > li</code></td><td><code>//ul/li</code></td></tr>
+    <tr><td>By attribute value</td><td><code>a[rel="next"]</code></td><td><code>//a[@rel="next"]</code></td></tr>
+    <tr><td>Attribute starts with</td><td><code>a[href^="/product/"]</code></td><td><code>//a[starts-with(@href,"/product/")]</code></td></tr>
+    <tr><td>Second item</td><td><code>li:nth-child(2)</code></td><td><code>//li[2]</code></td></tr>
+  </tbody>
+</table>
+</div>
+<p>The CSS column is shorter almost everywhere. Class matching in particular is clumsy in XPath, because a class attribute can hold several names.</p>
+
+<h2>What only XPath can do</h2>
+<h3>Select by text</h3>
+<p>CSS cannot look at an element's text. XPath can:</p>
+<pre><code>//button[contains(., "Load more")]
+//th[normalize-space()="Price"]</code></pre>
+<p>This is valuable on pages where class names are meaningless but the visible labels are stable.</p>
+<h3>Walk upwards and sideways</h3>
+<p>Suppose a page lists specifications as label and value pairs with no useful classes. Find the label, then step to the cell next to it:</p>
+<pre><code>//td[normalize-space()="Weight"]/following-sibling::td[1]</code></pre>
+<p>Or find a row that contains a particular link and take the whole row:</p>
+<pre><code>//a[contains(@href,"/seller/")]/ancestor::tr</code></pre>
+<h3>Return values, not elements</h3>
+<p>XPath can return an attribute, a number or a string directly:</p>
+<pre><code>//a/@href
+count(//article)
+string(//h1)</code></pre>
+
+<h2>What CSS does better</h2>
+<p>Modern CSS has caught up in places. The <code>:has()</code> selector picks a parent by its contents, which covers many "walk upwards" cases:</p>
+<pre><code>article:has(.badge-sale)
+li:not(.ad)</code></pre>
+<p>Chrome supports both, and they read more clearly than the XPath equivalents.</p>
+
+<h2>Writing selectors that survive a redesign</h2>
+<p>A selector that works today can fail next month when the site changes its markup. Some choices age better than others.</p>
+<ul>
+  <li><strong>Prefer meaning over position.</strong> <code>.product-title</code> will outlive <code>div > div:nth-child(3) > span</code>.</li>
+  <li><strong>Avoid generated class names.</strong> Names like <code>css-1x2y3z</code> or <code>sc-bdVaJa</code> are produced by build tools and change with every release.</li>
+  <li><strong>Use stable attributes.</strong> <code>data-testid</code>, <code>itemprop</code>, <code>aria-label</code> and <code>rel</code> are there for machines and rarely change.</li>
+  <li><strong>Keep it short.</strong> Every extra step is one more thing that can break. Start from the nearest stable ancestor.</li>
+  <li><strong>Anchor on text when classes are useless.</strong> Visible labels change less often than markup.</li>
+</ul>
+
+<h2>Rows and fields: the pattern for lists</h2>
+<p>To extract a list, you need two kinds of selector. A <strong>row selector</strong> matches each record, for example <code>article.product</code>. <strong>Field selectors</strong> are then evaluated inside each row: <code>h2</code> for the title, <code>.price</code> for the price, <code>a</code> with its <code>href</code> for the link.</p>
+<p>This keeps values together. If one product has no rating, its rating cell is empty and the others stay in the right rows. Selecting all titles and all ratings as two separate lists would silently misalign them.</p>
+
+<h2>Test before you run</h2>
+<p>Never run a selector blind. In Rowlio's Advanced Selectors screen you type a selector and see how many elements match, a sample of their values, and the matches highlighted on the page. Chrome's developer tools do something similar: press <code>Ctrl+F</code> in the Elements panel and type a CSS selector or an XPath expression.</p>
+<p>Check two numbers every time: the match count equals the number of items you can see, and no field reports fewer matches than there are rows unless that is expected.</p>
+
+<h2>Summary</h2>
+<p>Learn six CSS patterns and three XPath ones and you can describe almost anything on a page. Start with CSS, switch to XPath for text and for moving around the tree, and always prefer selectors that describe what the element is over where it happens to sit. If you are new to all of this, <a href="/blog/web-scraping-without-coding">start with point and click</a> and come back when a page needs more.</p>

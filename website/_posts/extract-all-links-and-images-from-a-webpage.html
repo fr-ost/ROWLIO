@@ -1,0 +1,57 @@
+<!-- {"title": "How to Extract All Links and Images from a Web Page", "description": "List every link or image address on a page in seconds, filter out the noise, and understand relative URLs, srcset and lazy-loaded images.", "date": "2026-11-14", "tag": "Tutorial", "order": 9} -->
+<p>Two of the most common extraction jobs need no setup at all: listing every link on a page and listing every image. They are useful for auditing a site, collecting sources for research, checking a page before it is published or gathering addresses for a later step. This guide shows how to do both and explains the details that decide whether the list is correct.</p>
+
+<h2>Extracting links</h2>
+<p>With Rowlio, open the page, click the icon and choose <strong>Links</strong>. Each link becomes a row with its text, its full address, the address exactly as written in the page, and attributes such as <code>title</code>, <code>target</code> and <code>rel</code>.</p>
+<p>A typical page has far more links than you expect: navigation, footers, social buttons, "skip to content" anchors. The value is in filtering.</p>
+<ul>
+  <li><strong>Internal or external.</strong> Internal links point to the same site. External ones leave it. An audit of outbound references needs only the second group.</li>
+  <li><strong>Inside a container.</strong> Limit the extraction to the article body or the results list and the navigation disappears.</li>
+  <li><strong>Text contains.</strong> Keep only links whose text includes a word, such as "PDF" or "Download".</li>
+  <li><strong>Matching a selector.</strong> For precise control, give a selector such as <code>a[href$=".pdf"]</code> for links that end in <code>.pdf</code>.</li>
+  <li><strong>Skip duplicates.</strong> The same address is often linked from a title, a thumbnail and a "Read more".</li>
+</ul>
+
+<h2>Relative and absolute addresses</h2>
+<p>Pages rarely write full addresses. A link is more often <code>/products/42</code> or <code>../about</code>, which only makes sense relative to the page it is on. A list of such fragments is useless once it leaves the page, so an extractor must resolve each one to a full address such as <code>https://shop.example/products/42</code>.</p>
+<p>Two details are easy to get wrong. A page can declare a different starting point with a <code>&lt;base href&gt;</code> tag, and every relative link must be resolved against that instead of the page address. And some "links" are not addresses at all: <code>mailto:</code>, <code>tel:</code> and <code>javascript:</code> entries should be recognised for what they are and never treated as pages to visit.</p>
+
+<h2>What link data is good for</h2>
+<ul>
+  <li><strong>Finding broken or outdated references</strong> in your own pages before readers do.</li>
+  <li><strong>Collecting sources</strong> from a long article or a bibliography page.</li>
+  <li><strong>Reviewing <code>rel</code> attributes</strong> such as <code>nofollow</code> and <code>sponsored</code> across a page.</li>
+  <li><strong>Building a list for a second step.</strong> Extract the product links from a category page, then run a batch over those addresses to collect details from each product page.</li>
+</ul>
+
+<h2>Extracting images</h2>
+<p>Choose <strong>Images</strong> and each image becomes a row: its address, alternative text, title, width and height, the kind of element it came from, and any other candidate sources. Rowlio lists addresses. It does not download the image files.</p>
+<p>Images are less straightforward than links, because modern pages rarely use one plain image tag.</p>
+<h3>Responsive images</h3>
+<p>A single picture is often offered in several sizes through the <code>srcset</code> attribute or a <code>&lt;picture&gt;</code> element, and the browser picks one to suit the screen. If you only read <code>src</code>, you may get a small placeholder. A good extractor reads the candidates and reports the best one along with the alternatives.</p>
+<h3>Lazy loading</h3>
+<p>To load faster, many pages put the real address in an attribute like <code>data-src</code> and fill in <code>src</code> only when the image scrolls into view. Until then <code>src</code> is empty or a tiny blank. Extractors need to check these attributes, or half the images on a long page come back as placeholders. If results still look incomplete, scroll through the page once and extract again.</p>
+<h3>Background images</h3>
+<p>Banners and tiles are frequently set as CSS backgrounds, so they are not image elements at all. They are found only if the tool also inspects styles, which is slower and usually offered as an option.</p>
+
+<h2>Filtering images</h2>
+<p>An unfiltered list is mostly icons, tracking pixels and logos. Useful filters:</p>
+<ul>
+  <li><strong>Minimum width and height.</strong> Setting both to 200 pixels removes icons and spacers in one step.</li>
+  <li><strong>Inside a container.</strong> Restrict to the gallery or the article.</li>
+  <li><strong>Address contains.</strong> Keep only images from a certain folder or of a certain type.</li>
+  <li><strong>Skip duplicates.</strong></li>
+</ul>
+
+<h2>What image data is good for</h2>
+<ul>
+  <li><strong>Accessibility checks.</strong> Sort by the alternative-text column and every image without a description is at the top.</li>
+  <li><strong>Performance reviews.</strong> Oversized images stand out when width and height are listed side by side.</li>
+  <li><strong>Catalogue work.</strong> Match product image addresses to product rows.</li>
+</ul>
+
+<h2>A note on rights</h2>
+<p>A list of addresses is a set of facts about a page. The images themselves usually belong to someone, and so do the articles behind the links. Listing them for an audit or for research is very different from copying and republishing the content. <a href="/blog/is-web-scraping-legal">Is web scraping legal?</a> goes through the questions worth asking first.</p>
+
+<h2>From list to file</h2>
+<p>Both extractions end in the same data preview as any other, so you can sort, filter, remove columns and export to a spreadsheet. If you are new to the tool, <a href="/blog/web-scraping-without-coding">web scraping without coding</a> covers the basics.</p>

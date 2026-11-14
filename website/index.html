@@ -3,20 +3,29 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{{storeTitle}}</title>
+  <title>{{storeTitle}} for Chrome | Free</title>
+  <meta name="robots" content="index, follow, max-image-preview:large">
   <meta name="description" content="{{description}}">
   <meta name="theme-color" content="#06120e">
   <link rel="canonical" href="{{siteUrl}}/">
   <meta property="og:type" content="website">
   <meta property="og:url" content="{{siteUrl}}/">
-  <meta property="og:title" content="{{storeTitle}}">
+  <meta property="og:site_name" content="{{name}}">
+  <meta property="og:title" content="{{storeTitle}} for Chrome">
   <meta property="og:description" content="{{description}}">
-  <meta property="og:image" content="{{siteUrl}}/assets/screens/00-home.png">
+  <meta property="og:image" content="{{siteUrl}}/assets/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
   <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="{{storeTitle}} for Chrome">
+  <meta name="twitter:description" content="{{description}}">
+  <meta name="twitter:image" content="{{siteUrl}}/assets/og-image.png">
+  <link rel="alternate" type="application/rss+xml" title="{{name}} Blog" href="feed.xml">
   <link rel="icon" type="image/png" sizes="32x32" href="assets/icons/icon-32.png">
   <link rel="apple-touch-icon" href="assets/icons/icon-128.png">
   <link rel="preload" href="assets/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="styles.css">
+  {{&jsonLd}}
   <noscript><style>.reveal{opacity:1;transform:none}.demo-table tbody tr{opacity:1;transform:none}</style></noscript>
 </head>
 <body>
@@ -35,6 +44,7 @@
       <a href="#privacy">Privacy</a>
       <a href="#install">Install</a>
       <a href="#faq">FAQ</a>
+      <a href="blog">Blog</a>
     </nav>
     <div class="nav-actions">
       <button class="icon-btn" id="sound-toggle" type="button" aria-pressed="true" aria-label="Sound effects" title="Sound effects">
@@ -240,6 +250,19 @@
         <details class="reveal"><summary>Does it handle non-English text?</summary><p>Yes. Everything is Unicode end to end, tested with বাংলা, emoji and more, including the CSV and Excel exports.</p></details>
         <details class="reveal"><summary>Is it a crawler?</summary><p>No. Pagination, infinite scroll and batch runs are started by you, bounded by limits you set, and can be stopped at any moment.</p></details>
       </div>
+      <p class="more reveal"><a class="btn btn-ghost" href="faq">More questions and answers <span class="arrow" aria-hidden="true">→</span></a> <a class="btn btn-ghost" href="support">Get support</a></p>
+    </section>
+
+    <!-- Blog -->
+    <section class="blog-teaser" id="guides" aria-labelledby="guides-title">
+      <div class="section-head reveal">
+        <p class="eyebrow">Guides</p>
+        <h2 id="guides-title">Learn to get data out of any page.</h2>
+        <p class="sub">Step-by-step articles on extracting tables, exporting to Excel, pagination, selectors and cleaning data.</p>
+      </div>
+      <div class="post-list reveal">{{&latestPosts}}
+      </div>
+      <p class="more reveal"><a class="btn btn-ghost" href="blog">All articles <span class="arrow" aria-hidden="true">→</span></a></p>
     </section>
 
     <!-- Final CTA -->
@@ -256,7 +279,7 @@
   <footer class="footer">
     <a class="brand" href="#top"><svg class="logo" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="url(#lg)"/><rect x="7" y="8.5" width="18" height="3.4" rx="1.7" fill="#fff"/><rect x="7" y="14.3" width="18" height="3.4" rx="1.7" fill="#fff" opacity=".82"/><rect x="7" y="20.1" width="11" height="3.4" rx="1.7" fill="#fff" opacity=".64"/></svg><span>{{name}}</span></a>
     <p class="credits">{{copyright}}. A Product of <a href="{{companyUrl}}" target="_blank" rel="noopener">{{company}}</a>. Developed by <a href="{{developerUrl}}" target="_blank" rel="noopener">{{developer}}</a>.</p>
-    <nav aria-label="Footer"><a href="privacy">Privacy</a><a href="#features">Features</a><a href="#install">Install</a><a href="{{companyUrl}}" target="_blank" rel="noopener">uniquelabs.org</a></nav>
+    <nav aria-label="Footer"><a href="about">About</a><a href="blog">Blog</a><a href="faq">FAQ</a><a href="support">Support</a><a href="contact">Contact</a><a href="privacy">Privacy Policy</a></nav>
   </footer>
 
   <script src="app.js" defer></script>

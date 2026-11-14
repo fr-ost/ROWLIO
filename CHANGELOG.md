@@ -29,6 +29,8 @@ Not yet published to the Chrome Web Store.
   Shahriar Ahmed." with links, in the workspace, the popup and Help & About.
 - **Marketing website** in `website/`, built by `scripts/website.mjs` and deployable to
   Vercel from the repository root (`vercel.json`).
+- Website: blog with ten articles, About, Contact, Support and FAQ pages, a 404 page,
+  structured data (JSON-LD), sitemap, robots.txt, RSS feed and a link-preview image.
 - 26 new unit tests and 12 new end-to-end tests.
 
 ### Changed

@@ -1,0 +1,62 @@
+<!-- {"title": "How to Scrape Paginated Websites and Infinite Scroll", "description": "Collect data across next-page links, numbered pages, load-more buttons and infinite scroll, with limits that keep the run safe and polite.", "date": "2026-11-14", "tag": "Tutorial", "order": 5} -->
+<p>The data you want is rarely on one page. A catalogue has forty pages, a feed keeps loading as you scroll, a directory hides the rest behind a "Load more" button. Collecting it all is the same extraction repeated, plus a way to move forward and a clear rule for when to stop. This guide covers each kind of paging and the limits that keep a run under control.</p>
+
+<h2>The four kinds of paging</h2>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>Type</th><th>How to recognise it</th><th>How to move on</th></tr></thead>
+  <tbody>
+    <tr><td>Next link</td><td>"Next", "›" or "Older posts" at the bottom</td><td>Follow the link until it disappears</td></tr>
+    <tr><td>Page numbers</td><td>1 2 3 … 40</td><td>Go to the number after the current one</td></tr>
+    <tr><td>Load more</td><td>A button that adds items to the same page</td><td>Click it until it is gone</td></tr>
+    <tr><td>Infinite scroll</td><td>New items appear as you reach the bottom</td><td>Scroll, wait, repeat</td></tr>
+  </tbody>
+</table>
+</div>
+<p>The first two replace the page content. The last two add to it. That difference decides how the data has to be collected.</p>
+
+<h2>Next links and page numbers</h2>
+<p>This is the simplest case. Extract the current page, activate the next control, wait for the new content, extract again. In Rowlio you set up the extraction on the first page and then open <strong>Pagination</strong>. The next-page control is detected automatically from signals such as <code>rel="next"</code>, the link text and its label. If the detection picks the wrong element, you can point at the right one or type a selector for it.</p>
+<p>Some sites load the next page without a full reload: the address changes, the list is swapped, and the rest of the page stays. From the outside this works the same way. The run waits until the content has actually changed before reading it.</p>
+
+<h2>Infinite scroll and load-more buttons</h2>
+<p>Here the page grows. Two details matter.</p>
+<p>First, <strong>collect while scrolling, not at the end</strong>. Many feeds keep only the items near the screen in the page and remove the earlier ones to save memory. If you scroll to the bottom and extract once, you get the last fifty items instead of all two thousand.</p>
+<p>Second, <strong>wait for content, not for time</strong>. After each scroll the page needs a moment to fetch and render. A fixed pause is either too short on a slow connection or wastefully long. A good run watches the page and continues when new items have appeared, or gives up after a timeout.</p>
+
+<h2>Always set limits</h2>
+<p>A run without limits is a crawler, and a crawler pointed at the wrong page can keep going for hours. Decide the bounds before you press start.</p>
+<ul>
+  <li><strong>Maximum pages or scrolls.</strong> Start with three. If the result looks right, raise it.</li>
+  <li><strong>Maximum records.</strong> If you need the first 500 results, say so and stop there.</li>
+  <li><strong>Delay between pages.</strong> A second or two is considerate and costs you little.</li>
+  <li><strong>A time limit</strong> for scrolling, so a feed that never ends cannot run forever.</li>
+</ul>
+<p>Rowlio requires these limits for every run and shows a Stop button in the workspace and on the page itself. Stopping keeps everything collected so far.</p>
+
+<h2>How a run should end</h2>
+<p>You should always know why a run stopped. The honest reasons are:</p>
+<ul>
+  <li>there was no next page, so everything was collected;</li>
+  <li>a limit you set was reached;</li>
+  <li>you pressed Stop;</li>
+  <li>the next page returned the same records as the previous one, which means the site is looping;</li>
+  <li>scrolling stopped producing new items.</li>
+</ul>
+<p>If a tool reports only "done", you cannot tell a complete result from a truncated one. Check the stated reason and compare the record count with what the site says it has.</p>
+
+<h2>Duplicates across pages</h2>
+<p>Listings change while you collect. A new item is added at the top, everything shifts down by one, and the last item of page two appears again as the first item of page three. Promoted items are often repeated on every page as well. Remove duplicate rows after the run, and decide what "duplicate" means: the same address or product ID is a better test than every column being identical.</p>
+
+<h2>When you already have the addresses</h2>
+<p>Sometimes there is no "next" at all. You have a list of pages, for example the product links you extracted from a category page, and you want details from each one. That is a batch run: the same extraction applied to each address in a list you supply, with the same limits, delay and Stop button. Each row records the page it came from, so you can join the details back to the original list.</p>
+
+<h2>A sensible routine</h2>
+<ol>
+  <li>Get the extraction right on one page first.</li>
+  <li>Run with a limit of two or three pages and inspect the result.</li>
+  <li>Check for duplicates and for a page that came back empty.</li>
+  <li>Only then raise the limit to what you need.</li>
+  <li>Note the stop reason and the date with the saved data.</li>
+</ol>
+<p>Before collecting at any volume, read <a href="/blog/is-web-scraping-legal">what to check about a site's rules</a>. When the run is finished, <a href="/blog/how-to-clean-scraped-data">cleaning the data</a> is the next step.</p>

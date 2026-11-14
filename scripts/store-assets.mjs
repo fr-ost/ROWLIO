@@ -89,6 +89,26 @@ const jobs = [
        <img class="shot" src="${url('docs', 'screenshots', '00-home.png')}">`,
     ),
   },
+  {
+    // Link-preview image for the website (Open Graph / Twitter), not a store asset.
+    file: path.join('..', 'website', 'assets', 'og-image.png'),
+    width: 1200,
+    height: 630,
+    html: page(
+      `.left { position: absolute; left: 70px; top: 0; bottom: 0; width: 560px; display: flex; flex-direction: column; justify-content: center; }
+       .brand { font-size: 42px; } h1 { font-size: 62px; line-height: 1.05; letter-spacing: -0.04em; font-weight: 800; margin-top: 28px; }
+       p { font-size: 23px; line-height: 1.45; color: #a7c4b8; margin-top: 22px; }
+       .pill { font-size: 17px; padding: 8px 18px; margin-top: 28px; align-self: flex-start; }
+       .shot { position: absolute; left: 660px; top: 95px; width: 820px; transform: perspective(1800px) rotateY(-9deg) rotateX(2deg); transform-origin: left center; }`,
+      `<div class="left">
+         <div class="brand">${logo(56)}${esc(brand.name)}</div>
+         <h1>${esc(headA)}<br><span class="grad">${esc(headB)}</span></h1>
+         <p>A free Chrome extension. Nothing leaves your browser.</p>
+         <span class="pill">Free forever · No account · 100% local</span>
+       </div>
+       <img class="shot" src="${url('docs', 'screenshots', '00-home.png')}">`,
+    ),
+  },
   ...[
     ['00-home.png', 'See what a page contains', 'Tables, lists, links and images, counted the moment you open it.'],
     ['01-tables.png', 'Every table, previewed', 'Merged cells, multi-row headers and nested tables handled properly.'],

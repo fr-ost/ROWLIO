@@ -1,0 +1,58 @@
+<!-- {"title": "Is Web Scraping Legal? A Practical, Ethical Guide", "description": "The questions that decide whether scraping a site is acceptable: public or private data, terms of use, personal data, copyright and server load.", "date": "2026-11-14", "tag": "Guide", "order": 6} -->
+<p>"Is web scraping legal?" has no single answer. It depends on what you collect, how you collect it, what you do with it and where you are. This article is not legal advice, and for anything commercial or involving personal data you should ask a lawyer who knows your jurisdiction. What it can give you is the set of questions that matter, so you can tell a harmless task from a risky one.</p>
+
+<h2>The general picture</h2>
+<p>Reading a public web page is what browsers do. Copying facts from it by hand has never been controversial, and doing the same with a tool is not unlawful merely because a tool was used. Trouble comes from specific things: getting past access controls, breaking a contract you agreed to, misusing personal data, republishing protected content, or harming the site's service. Each of those is a separate question.</p>
+
+<h2>Question 1: is the data public?</h2>
+<p>There is a clear line between pages anyone can open and pages behind a login, a paywall or another barrier. Data you can only reach by signing in was shared with you under the conditions of that account. Circumventing technical protection, such as defeating a CAPTCHA, using someone else's credentials or evading a block, is where many laws on unauthorised access apply.</p>
+<p>A sound rule: collect only what your own browser session is legitimately shown, and never work around a barrier that was put there to keep automated access out.</p>
+
+<h2>Question 2: what do the terms of use say?</h2>
+<p>Many sites state in their terms whether automated collection is allowed. If you created an account or clicked "I agree", those terms are likely to bind you as a contract. If you never agreed to anything, their force is less certain and varies by country. Either way, reading them tells you what the owner expects, and ignoring a clear prohibition is a risk even where the law is unsettled.</p>
+<p>Also look at <code>/robots.txt</code>. It is a convention, not a law, but it is the site's published statement of which areas automated visitors should stay out of. Respecting it is basic good manners.</p>
+
+<h2>Question 3: is it personal data?</h2>
+<p>This is the question people underestimate. Names, email addresses, phone numbers, photos and profile details are personal data. In the EU and the UK, the GDPR applies to it even when it is publicly visible, and other regions, including California, have their own rules. "It was on the internet" is not a legal basis.</p>
+<p>If your project touches personal data, you need to be able to answer:</p>
+<ul>
+  <li>What is the purpose, and is it one the people concerned would reasonably expect?</li>
+  <li>Are you collecting only what that purpose requires?</li>
+  <li>How long will you keep it, and how is it protected?</li>
+  <li>Can you honour a request to delete someone's data?</li>
+</ul>
+<p>Collecting contact details to send unsolicited marketing is the classic way to get this wrong.</p>
+
+<h2>Question 4: is the content protected by copyright?</h2>
+<p>Facts are generally not protected: a price, a temperature, an opening time. Creative expression is: article text, photographs, reviews written by users, product descriptions. Extracting facts for analysis is very different from copying articles and republishing them. In some places collections of data have their own protection as well. Using data internally for research carries far less risk than publishing it or building a competing product on it.</p>
+
+<h2>Question 5: are you putting load on the site?</h2>
+<p>Requesting thousands of pages in a short time can slow a site down or cost its owner money. That can be actionable regardless of what the data is. It is also the easiest issue to avoid:</p>
+<ul>
+  <li>leave a delay between pages;</li>
+  <li>set a limit and take only the pages you need;</li>
+  <li>collect once and save the result, instead of fetching the same pages again;</li>
+  <li>if the site offers an API or a data download, use that.</li>
+</ul>
+
+<h2>A quick risk check</h2>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>Lower risk</th><th>Higher risk</th></tr></thead>
+  <tbody>
+    <tr><td>Public pages, no login</td><td>Behind a login, paywall or CAPTCHA</td></tr>
+    <tr><td>Facts and figures</td><td>Articles, photos, reviews</td></tr>
+    <tr><td>No personal data</td><td>Names, emails, profiles</td></tr>
+    <tr><td>Personal research or internal analysis</td><td>Republishing or reselling</td></tr>
+    <tr><td>A few pages, slowly</td><td>Whole site, as fast as possible</td></tr>
+    <tr><td>Terms are silent or permit it</td><td>Terms prohibit it and you accepted them</td></tr>
+  </tbody>
+</table>
+</div>
+<p>One item in the right-hand column does not make a project unlawful, and everything in the left-hand column does not make it safe. The table shows where to slow down and get advice.</p>
+
+<h2>How the tool affects this</h2>
+<p>A tool cannot make a questionable project acceptable, but its design can keep you out of the worst territory. Rowlio is built around a few deliberate limits: it reads only pages you have opened in your own browser, it does not bypass logins, paywalls, CAPTCHAs or anti-bot systems, and every multi-page run is started by you, bounded and stoppable. It also keeps the data on your device, which is one less party handling it. <a href="/blog/local-vs-cloud-web-scrapers">Local versus cloud scrapers</a> explains why that matters for confidentiality.</p>
+
+<h2>The ethical test</h2>
+<p>Beyond the law, three questions settle most cases. Would the site owner object if they watched you do it? Would the people in the data be surprised by how you use it? Would you be comfortable describing the project publicly? If all three answers are comfortable, you are probably on solid ground. If one is not, that is the part to fix before you start.</p>

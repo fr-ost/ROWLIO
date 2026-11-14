@@ -1,0 +1,62 @@
+<!-- {"title": "Local vs Cloud Web Scrapers: Privacy, Cost and Limits", "description": "How browser-based and cloud-based scrapers differ in where your data goes, what they cost, what they can reach and which jobs each one suits.", "date": "2026-11-14", "tag": "Guide", "order": 10} -->
+<p>Web scraping tools fall into two families. Cloud scrapers run on the provider's servers: you describe the job, their machines fetch the pages, and you download the result. Local scrapers run in your own browser and work on the page you have open. Neither is better in general. They make different trade-offs on privacy, cost, reach and scale, and knowing them lets you choose the right one for a job.</p>
+
+<h2>How each one works</h2>
+<p>A <strong>cloud scraper</strong> requests pages from its own servers. Your instructions, the addresses you target and the extracted data all pass through and are stored on infrastructure you do not control, at least until you download and delete them.</p>
+<p>A <strong>local scraper</strong> is a browser extension or desktop program. The page is loaded by your browser as usual, and the tool reads it there. If it is designed to, it can do everything without contacting any server at all.</p>
+
+<h2>Privacy and confidentiality</h2>
+<p>This is the largest difference. With a cloud service, a third party knows which sites you collect from and holds a copy of what you collected. For public price lists that may not matter. It matters a great deal when:</p>
+<ul>
+  <li>the page is inside your company, such as an admin panel, a CRM or an internal report;</li>
+  <li>the data includes personal information that you are responsible for under data-protection law;</li>
+  <li>the targets themselves are sensitive, for example a competitor analysis or a journalistic investigation;</li>
+  <li>your organisation's policy does not allow data to be sent to unapproved services.</li>
+</ul>
+<p>To scrape a page behind a login, a cloud service needs your session or your password. Handing credentials to a third party is a risk many organisations rule out entirely. A local tool uses the session already in your browser and passes nothing on.</p>
+<p>Not every extension is local in this sense, so check. The reliable signs are a short list of permissions, a privacy policy stating that nothing is collected, and no account requirement. Rowlio requests two permissions, has no server and makes no network requests of its own. Its extension pages run under a policy that makes the browser block outbound connections.</p>
+
+<h2>Cost</h2>
+<p>Cloud scraping has real running costs: servers, bandwidth and often proxy networks. Providers recover these through subscriptions, usually tiered by pages or rows per month, with a limited free plan.</p>
+<p>A local tool uses your computer and your connection, so its running cost to the maker is close to nothing. That is why a local tool can be free without usage limits, and why a "free" cloud tool always has a ceiling somewhere.</p>
+
+<h2>What each can reach</h2>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>Situation</th><th>Local</th><th>Cloud</th></tr></thead>
+  <tbody>
+    <tr><td>Pages you are signed in to</td><td>Yes, uses your session</td><td>Only with your credentials</td></tr>
+    <tr><td>Intranet and private network pages</td><td>Yes</td><td>No</td></tr>
+    <tr><td>Pages built by JavaScript</td><td>Yes, the browser renders them</td><td>Depends on the service</td></tr>
+    <tr><td>Running while your computer is off</td><td>No</td><td>Yes</td></tr>
+    <tr><td>Scheduled daily runs</td><td>Generally no</td><td>Yes</td></tr>
+    <tr><td>Tens of thousands of pages</td><td>Impractical</td><td>Yes</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h2>Scale and speed</h2>
+<p>Here cloud tools win clearly. They run many requests in parallel, around the clock. A local tool works through pages one at a time in a browser tab, at a pace a person might browse. For a few dozen or a few hundred pages that is fine. For a whole large site it is the wrong tool.</p>
+<p>The slower pace has a benefit: a local run looks like, and is, one person's browser visiting pages with pauses in between. It is hard to overload a site that way.</p>
+
+<h2>Reliability and blocking</h2>
+<p>Sites often restrict traffic from data-centre addresses, so cloud providers add proxy rotation and other techniques to keep working. That is an arms race, and some of those techniques sit uneasily with the site's rules. A local tool does not take part: it reads what your browser has been given. If a site shows you a CAPTCHA, you solve it yourself, as a person, and carry on.</p>
+
+<h2>Which should you use?</h2>
+<p>Choose a <strong>local</strong> scraper when:</p>
+<ul>
+  <li>the data is confidential, personal or behind your own login;</li>
+  <li>you need a table or a list from a page now, not a recurring pipeline;</li>
+  <li>the job is tens or hundreds of pages;</li>
+  <li>you do not want an account, a subscription or a usage cap.</li>
+</ul>
+<p>Choose a <strong>cloud</strong> scraper when:</p>
+<ul>
+  <li>you need data collected on a schedule without your computer running;</li>
+  <li>the volume is in the thousands of pages or more;</li>
+  <li>the data is public and non-sensitive, and the provider's terms suit your use.</li>
+</ul>
+<p>Many people need both at different times. For everyday work, where the task is getting what is on one page or one short series of pages into a spreadsheet, a local tool is faster to start, costs nothing and keeps the data with you.</p>
+
+<h2>Next steps</h2>
+<p>If local suits your job, <a href="/blog/web-scraping-without-coding">web scraping without coding</a> shows a first extraction from start to finish, and <a href="/blog/scrape-table-from-website-to-excel">scraping a table into Excel</a> covers the most common task of all.</p>

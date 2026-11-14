@@ -1,0 +1,59 @@
+<!-- {"title": "How to Scrape a Table from a Website into Excel", "description": "Three ways to get an HTML table into Excel, what goes wrong with merged cells and number formats, and how to fix it without writing code.", "date": "2026-11-14", "tag": "Tutorial", "order": 1} -->
+<p>A table on a web page looks like a spreadsheet, so it is natural to expect that moving it into Excel takes one step. Often it does not. Merged cells shift columns, numbers arrive as text, and the table you wanted turns out to be split over several pages. This guide covers three ways to do it, when each one works, and how to deal with the usual problems.</p>
+
+<h2>Method 1: copy and paste</h2>
+<p>Select the table with the mouse, copy it, and paste it into a sheet. For a small, simple table this is the fastest route and there is no reason to use anything else.</p>
+<p>It breaks down in predictable ways:</p>
+<ul>
+  <li><strong>Formatting comes along.</strong> Fonts, colours, links and images are pasted too. "Paste special → Text" helps, but then merged cells collapse.</li>
+  <li><strong>Selecting is fiddly.</strong> On long or scrollable tables it is easy to miss the last rows or pick up text around the table.</li>
+  <li><strong>Hidden rows are unpredictable.</strong> Rows hidden by a filter on the page may or may not be copied, and you get no warning either way.</li>
+</ul>
+
+<h2>Method 2: Excel's "From Web" import</h2>
+<p>Excel can fetch a page itself: <strong>Data → Get Data → From Other Sources → From Web</strong>. You paste the address, Excel lists the tables it found, and you load one. The import can be refreshed later, which is useful for a table that changes daily.</p>
+<p>The limitation is that Excel downloads the page on its own, without your browser. It therefore cannot see:</p>
+<ul>
+  <li>pages behind a login you are signed in to in the browser;</li>
+  <li>tables that are built by JavaScript after the page loads, which is how many modern sites work;</li>
+  <li>whatever you filtered, sorted or expanded on the page before importing.</li>
+</ul>
+<p>If the list of tables comes back empty for a page where you can plainly see one, this is the reason.</p>
+
+<h2>Method 3: a table extractor in the browser</h2>
+<p>A browser extension reads the page as your browser has rendered it, so it sees the same table you see, including ones created by scripts. With Rowlio the steps are:</p>
+<ol>
+  <li>Open the page and click the Rowlio icon in the toolbar.</li>
+  <li>Choose <strong>Extract tables</strong>. Every table on the page is listed with a preview and its row and column counts.</li>
+  <li>Extract the one you want, check it in the data preview, and choose <strong>Export → Excel (XLSX)</strong>.</li>
+</ol>
+<p>The file is built in your browser. Nothing is uploaded, which matters if the table is on an internal or signed-in page.</p>
+
+<h2>Problems you will run into, and what to do</h2>
+<h3>Merged cells</h3>
+<p>Web tables use <code>rowspan</code> and <code>colspan</code> to merge cells. When a merged cell is flattened carelessly, every value to its right moves one column left. A proper extractor rebuilds the grid first and then either repeats the merged value in each cell it covers or leaves the covered cells empty. Repeating is usually what you want for analysis, because every row then stands on its own when you sort or filter.</p>
+<h3>Headers that span two rows</h3>
+<p>A header such as "2024" above "H1" and "H2" should become two columns named "2024 - H1" and "2024 - H2". If your import shows the second header row as the first row of data, promote it manually or use a tool that merges header rows.</p>
+<h3>Numbers stored as text</h3>
+<p>Values like <code>1,234.50</code>, <code>€ 12</code> or <code>15%</code> are text until something converts them. In Excel, select the column and use <strong>Data → Text to Columns → Finish</strong>, or clean the column before exporting. Be careful with identifiers: a product code like <code>00123</code> or a phone number should stay text, or the leading zeros are lost.</p>
+<h3>Dates in the wrong order</h3>
+<p><code>03/04/2024</code> is 3 April in most of the world and 4 March in the United States. Excel guesses from your system settings. If you can, convert dates to the unambiguous <code>2024-04-03</code> form before they reach the spreadsheet.</p>
+<h3>The table continues on the next page</h3>
+<p>Copying page by page is slow and error-prone. See <a href="/blog/scrape-paginated-websites-and-infinite-scroll">how to collect data across pages and infinite scroll</a> for doing it in one run with sensible limits.</p>
+
+<h2>Which method should you use?</h2>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>Situation</th><th>Best choice</th></tr></thead>
+  <tbody>
+    <tr><td>Small, plain table, one time</td><td>Copy and paste</td></tr>
+    <tr><td>Public page, same table needed every week</td><td>Excel "From Web"</td></tr>
+    <tr><td>Table built by JavaScript, behind a login, or with merged cells</td><td>Browser extension</td></tr>
+    <tr><td>Several tables on one page</td><td>Browser extension (one sheet per table)</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h2>A quick check before you trust the result</h2>
+<p>Whatever method you use, compare three things with the page: the number of rows, the first row and the last row. Then sort one numeric column and look at both ends. Text hiding among numbers shows up immediately, and it takes less than a minute.</p>
+<p>If the data needs more than a glance, <a href="/blog/how-to-clean-scraped-data">cleaning scraped data</a> walks through the usual fixes in order.</p>
