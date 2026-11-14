@@ -24,8 +24,19 @@ test.describe('website', () => {
       expect(html, page).toContain('href="https://www.uniquelabs.org"');
       expect(html, page).toContain('href="https://t.me/igfrostt"');
       // Nothing is loaded from other origins: no trackers, CDNs or web fonts.
-      expect(html, page).not.toMatch(/<(script|link|img)[^>]+(src|href)="https?:/);
+      // (The canonical link names this site's own address and loads nothing.)
+      expect(html.replace(/<link rel="canonical"[^>]*>/g, ''), page).not.toMatch(/<(script|link|img)[^>]+(src|href)="https?:/);
+      expect(html, page).toMatch(/<link rel="canonical" href="https:\/\/rowlio\.uniquelabs\.org\//);
     }
+  });
+
+  test('has a sitemap and robots.txt for the public address', () => {
+    const sitemap = fs.readFileSync(path.join(dist, 'sitemap.xml'), 'utf8');
+    const locs = Array.from(sitemap.matchAll(/<loc>([^<]+)<\/loc>/g), (match) => match[1]);
+    expect(locs).toEqual(['https://rowlio.uniquelabs.org/', 'https://rowlio.uniquelabs.org/privacy']);
+    expect(sitemap).toMatch(/^<\?xml version="1\.0" encoding="UTF-8"\?>\n<urlset xmlns="http:\/\/www\.sitemaps\.org\/schemas\/sitemap\/0\.9">/);
+    expect(sitemap).toMatch(/<lastmod>\d{4}-\d{2}-\d{2}<\/lastmod>/);
+    expect(fs.readFileSync(path.join(dist, 'robots.txt'), 'utf8')).toContain('Sitemap: https://rowlio.uniquelabs.org/sitemap.xml');
   });
 
   test('renders, offers the download and makes no third-party requests', async ({ page }) => {

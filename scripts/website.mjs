@@ -39,6 +39,10 @@ const zip = available.includes(zipName) ? zipName : (available[available.length 
 if (!zip) console.warn('[website] no extension archive in website/downloads – run `npm run package` first');
 const zipSize = zip ? `${Math.round((await fs.stat(path.join(downloads, zip))).size / 1024)} KB` : '';
 
+// Public address of the site (no trailing slash): canonical links, sitemap and robots.txt.
+const siteUrl = String(brand.urls.website || '').replace(/\/+$/, '');
+if (!siteUrl) throw new Error('brand.config.json: urls.website is required to build the website');
+
 const tokens = {
   name: brand.name,
   storeTitle: brand.storeTitle,
@@ -48,6 +52,7 @@ const tokens = {
   motto: brand.motto,
   company: brand.company,
   companyUrl: brand.urls.homepage,
+  siteUrl,
   copyright: brand.copyright,
   developer: brand.developer.name,
   developerUrl: brand.developer.url,
@@ -81,10 +86,19 @@ await fs.rm(out, { recursive: true, force: true });
 await copyDir(src, out);
 await copyDir(path.join(root, 'docs', 'screenshots'), path.join(out, 'assets', 'screens'));
 await copyDir(path.join(root, 'public', 'icons'), path.join(out, 'assets', 'icons'));
+// sitemap.xml and robots.txt: one entry per page, at the clean URL Vercel serves it from.
+const pages = (await fs.readdir(src)).filter((file) => file.endsWith('.html')).sort((a, b) => (a === 'index.html' ? -1 : b === 'index.html' ? 1 : a.localeCompare(b)));
+const today = new Date().toISOString().slice(0, 10);
+const entries = pages.map((file) => {
+  const loc = file === 'index.html' ? `${siteUrl}/` : `${siteUrl}/${file.replace(/\.html$/, '')}`;
+  return `  <url>\n    <loc>${escapeHtml(loc)}</loc>\n    <lastmod>${today}</lastmod>\n    <priority>${file === 'index.html' ? '1.0' : '0.5'}</priority>\n  </url>`;
+});
+await fs.writeFile(path.join(out, 'sitemap.xml'), `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${entries.join('\n')}\n</urlset>\n`);
+await fs.writeFile(path.join(out, 'robots.txt'), `User-agent: *\nAllow: /\n\nSitemap: ${siteUrl}/sitemap.xml\n`);
 console.log(`[website] built ${path.relative(root, out)}/ (download: ${zip || 'none'})`);
 
 if (process.argv.includes('--serve')) {
-  const types = { '.html': 'text/html; charset=utf-8', '.css': 'text/css', '.js': 'text/javascript', '.png': 'image/png', '.svg': 'image/svg+xml', '.woff2': 'font/woff2', '.zip': 'application/zip', '.txt': 'text/plain; charset=utf-8', '.json': 'application/json' };
+  const types = { '.html': 'text/html; charset=utf-8', '.css': 'text/css', '.js': 'text/javascript', '.png': 'image/png', '.svg': 'image/svg+xml', '.woff2': 'font/woff2', '.zip': 'application/zip', '.txt': 'text/plain; charset=utf-8', '.json': 'application/json', '.xml': 'application/xml' };
   const port = Number(process.env.PORT || 4321);
   http
     .createServer(async (req, res) => {
